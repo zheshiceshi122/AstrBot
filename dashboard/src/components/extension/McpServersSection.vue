@@ -1,5 +1,19 @@
 <template>
   <div class="tools-page">
+    <PageToolbar class="tool-page-header">
+      <div class="tool-page-title"><slot name="heading" /></div>
+      <template #actions><div class="tool-page-actions">
+        <v-btn variant="text" color="primary" :aria-label="tm('mcpServers.buttons.sync')" :title="tm('mcpServers.buttons.sync')" @click="showSyncMcpServerDialog = true">
+          <RefreshCw :size="18" aria-hidden="true" />
+          <span class="tool-page-action-label">{{ tm('mcpServers.buttons.sync') }}</span>
+        </v-btn>
+        <v-btn variant="tonal" color="primary" :aria-label="tm('mcpServers.buttons.add')" :title="tm('mcpServers.buttons.add')" @click="showMcpServerDialog = true">
+          <Plus :size="18" aria-hidden="true" />
+          <span class="tool-page-action-label">{{ tm('mcpServers.buttons.add') }}</span>
+        </v-btn>
+      </div></template>
+      <template #description><p class="tool-page-description"><slot name="description" /></p></template>
+    </PageToolbar>
     <v-container fluid class="pa-0" elevation="0">
       <!-- MCP 服务器部分 -->
       <div v-if="mcpServers.length === 0" class="text-center pa-8">
@@ -105,6 +119,7 @@
             </v-chip>
           </template>
 
+          <div class="mcp-server-meta">
           <div
             class="mcp-server-config text-body-2 text-medium-emphasis"
             :title="getServerConfigSummary(server)"
@@ -119,7 +134,7 @@
 
           <div class="mcp-server-tools text-caption text-medium-emphasis">
             <template v-if="server.tools && server.tools.length > 0">
-              <v-dialog max-width="600px">
+              <v-dialog class="dashboard-form-dialog" max-width="600px">
                 <template v-slot:activator="{ props: listToolsProps }">
                   <button
                     v-bind="listToolsProps"
@@ -171,6 +186,8 @@
               </v-icon>
               {{ tm('mcpServers.status.noTools') }}
             </template>
+          </div>
+
           </div>
 
           <template v-if="!batchSelectionEnabled" #actions>
@@ -228,36 +245,7 @@
       </div>
     </v-container>
 
-    <div class="mcp-fab-stack">
-      <v-tooltip :text="tm('mcpServers.buttons.sync')" location="left">
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            color="darkprimary"
-            icon="mdi-sync"
-            size="x-large"
-            variant="elevated"
-            class="mcp-fab"
-            @click="showSyncMcpServerDialog = true"
-          />
-        </template>
-      </v-tooltip>
-      <v-tooltip :text="tm('mcpServers.buttons.add')" location="left">
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            color="darkprimary"
-            icon="mdi-plus"
-            size="x-large"
-            variant="elevated"
-            class="mcp-fab"
-            @click="showMcpServerDialog = true"
-          />
-        </template>
-      </v-tooltip>
-    </div>
-
-    <v-dialog v-model="batchDeleteDialog" max-width="520px" :persistent="batchDeleting">
+    <v-dialog class="dashboard-form-dialog" v-model="batchDeleteDialog" max-width="520px" :persistent="batchDeleting">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">
           {{ tm('mcpServers.batchDeleteTitle') }}
@@ -292,7 +280,7 @@
     </v-dialog>
 
     <!-- 添加/编辑 MCP 服务器对话框 -->
-    <v-dialog v-model="showMcpServerDialog" max-width="750px">
+    <v-dialog class="dashboard-form-dialog" v-model="showMcpServerDialog" max-width="750px">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">
           <v-icon class="me-2">{{ isEditMode ? 'mdi-pencil' : 'mdi-plus' }}</v-icon>
@@ -304,8 +292,8 @@
             <v-text-field v-model="currentServer.name" :label="tm('dialogs.addServer.fields.name')" variant="outlined"
               :rules="[v => !!v || tm('dialogs.addServer.fields.nameRequired')]" required class="mb-3"></v-text-field>
 
-            <div class="mb-2 d-flex align-center">
-              <span class="text-subtitle-1">{{ tm('dialogs.addServer.fields.config') }}</span>
+            <div class="mb-2 mcp-config-actions d-flex align-center flex-wrap">
+              <span class="text-subtitle-1 mcp-config-label">{{ tm('dialogs.addServer.fields.config') }}</span>
               <v-spacer></v-spacer>
               <v-btn size="small" color="primary" variant="tonal" @click="setConfigTemplate('stdio')" class="me-1">
                 {{ tm('mcpServers.buttons.useTemplateStdio') }}
@@ -366,7 +354,7 @@
     </v-dialog>
 
     <!-- 同步 MCP 服务器对话框 -->
-    <v-dialog v-model="showSyncMcpServerDialog" max-width="500px" persistent>
+    <v-dialog class="dashboard-form-dialog" v-model="showSyncMcpServerDialog" max-width="500px" persistent>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">
           <span>同步外部平台 MCP 服务器</span>
@@ -429,6 +417,8 @@
 </template>
 
 <script>
+import PageToolbar from '@/components/shared/PageToolbar.vue';
+import { RefreshCw, Plus } from '@lucide/vue';
 import { LazyMonacoEditor as VueMonacoEditor } from '@/components/shared/LazyMonacoEditor';
 import { mcpApi } from '@/api/v1';
 import { useI18n, useModuleI18n } from '@/i18n/composables';
@@ -442,6 +432,8 @@ import {
 export default {
   name: 'McpServersSection',
   components: {
+    PageToolbar,
+    RefreshCw, Plus,
     VueMonacoEditor,
     OutlinedActionListItem
   },
@@ -957,27 +949,8 @@ export default {
   color: rgb(var(--v-theme-on-surface));
 }
 
-.mcp-fab-stack {
-  align-items: center;
-  bottom: 52px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: fixed;
-  right: 52px;
-  z-index: 10000;
-}
 
-.mcp-fab {
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
 
-.mcp-fab:hover {
-  box-shadow: 0 12px 20px rgba(var(--v-theme-primary), 0.4);
-  transform: translateY(-4px) scale(1.05);
-}
 
 .monaco-container {
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -1002,4 +975,30 @@ export default {
   }
 }
 
+@media (max-width: 600px) {
+  .mcp-list-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .mcp-list-title { font-size: 13px !important; margin: 0; }
+  .mcp-search-wrap { min-width: 0; width: auto; }
+  .mcp-list-actions { width: auto; margin: 0; gap: 4px; }
+  .mcp-list-actions:has(> .v-btn:nth-child(2)) { grid-column: 1 / -1; justify-content: flex-end; }
+  .text-center.pa-8 { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 10px !important; font-size: 13px; }
+  .text-center.pa-8 > .v-icon { font-size: 32px !important; width: 32px !important; height: 32px !important; }
+  .text-center.pa-8 > p { margin: 0 !important; }
+}
+@media (max-width: 600px) {
+  .mcp-server-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+  .mcp-server-config { min-width: 0; font-size: 12px !important; }
+  .mcp-server-tools { margin-top: 0; }
+  .mcp-server-list { gap: 6px; }
+  /* The template buttons used to squeeze the "服务器配置" label into a vertical
+     strip of single characters. Put the label on its own row and let the
+     buttons share the next one. */
+  .mcp-config-label { flex: 1 0 100%; margin-bottom: 2px; }
+  .mcp-config-actions .v-spacer { display: none; }
+  .mcp-config-actions .v-btn {
+    flex: 1 1 auto;
+    margin-inline-end: 0 !important;
+    padding-inline: 8px;
+  }
+}
 </style>

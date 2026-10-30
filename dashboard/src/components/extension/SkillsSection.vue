@@ -1,5 +1,19 @@
 <template>
   <div class="skills-page">
+    <PageToolbar class="tool-page-header">
+      <div class="tool-page-title"><slot name="heading" /></div>
+      <template #actions><div class="tool-page-actions">
+        <v-btn variant="text" color="primary" :aria-label="tm('skills.refresh')" :title="tm('skills.refresh')" @click="refreshCurrentMode">
+          <RefreshCw :size="18" aria-hidden="true" />
+          <span class="tool-page-action-label">{{ tm('skills.refresh') }}</span>
+        </v-btn>
+        <v-btn v-if="mode === 'local'" variant="tonal" color="primary" :aria-label="tm('skills.upload')" :title="tm('skills.upload')" @click="openUploadDialog">
+          <Upload :size="18" aria-hidden="true" />
+          <span class="tool-page-action-label">{{ tm('skills.upload') }}</span>
+        </v-btn>
+      </div></template>
+      <template #description><p class="tool-page-description"><slot name="description" /></p></template>
+    </PageToolbar>
     <v-container fluid class="pa-0" elevation="0">
       <v-row
         v-if="neoEnabled"
@@ -187,7 +201,7 @@
                 {{ skill.description || tm("skills.noDescription") }}
               </div>
 
-              <div class="skill-path text-caption text-medium-emphasis">
+              <div v-if="skill.path" class="skill-path text-caption text-medium-emphasis">
                 <v-icon size="small" class="me-1">mdi-file-document</v-icon>
                 {{ tm("skills.path") }}: {{ skill.path }}
               </div>
@@ -473,40 +487,7 @@
       </template>
     </v-container>
 
-    <div class="skills-fab-stack">
-      <v-tooltip :text="tm('skills.refresh')" location="left">
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            color="darkprimary"
-            icon="mdi-refresh"
-            size="x-large"
-            variant="elevated"
-            class="skills-fab"
-            @click="refreshCurrentMode"
-          />
-        </template>
-      </v-tooltip>
-      <v-tooltip
-        v-if="mode === 'local'"
-        :text="tm('skills.upload')"
-        location="left"
-      >
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            color="darkprimary"
-            icon="mdi-upload"
-            size="x-large"
-            variant="elevated"
-            class="skills-fab"
-            @click="openUploadDialog"
-          />
-        </template>
-      </v-tooltip>
-    </div>
-
-    <v-dialog v-model="uploadDialog" max-width="880px" :persistent="uploading">
+    <v-dialog class="dashboard-form-dialog" v-model="uploadDialog" max-width="880px" :persistent="uploading">
       <v-card class="skills-upload-dialog">
         <v-card-title
           class="text-h3 pa-4 pb-0 pl-6 skills-upload-dialog__header"
@@ -715,7 +696,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="deleteDialog" max-width="400px">
+    <v-dialog class="dashboard-form-dialog" v-model="deleteDialog" max-width="400px">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
           tm("skills.deleteTitle")
@@ -737,7 +718,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog
+    <v-dialog class="dashboard-form-dialog"
       v-model="batchDeleteDialog"
       max-width="520px"
       :persistent="batchDeleting"
@@ -789,7 +770,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog
+    <v-dialog class="dashboard-form-dialog"
       v-model="editorDialog.show"
       max-width="1180px"
       :fullscreen="$vuetify.display.mdAndDown"
@@ -930,7 +911,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="payloadDialog.show" max-width="820px">
+    <v-dialog class="dashboard-form-dialog" v-model="payloadDialog.show" max-width="820px">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
           tm("skills.neoPayloadTitle")
@@ -958,6 +939,8 @@
 </template>
 
 <script>
+import PageToolbar from '@/components/shared/PageToolbar.vue';
+import { RefreshCw, Upload } from '@lucide/vue';
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { LazyMonacoEditor as VueMonacoEditor } from '@/components/shared/LazyMonacoEditor';
 import { skillApi, systemConfigApi } from "@/api/v1";
@@ -975,6 +958,8 @@ const STATUS_SKIPPED = "skipped";
 export default {
   name: "SkillsSection",
   components: {
+    PageToolbar,
+    RefreshCw, Upload,
     OutlinedActionListItem,
     VueMonacoEditor,
   },
@@ -2318,27 +2303,8 @@ export default {
   margin-top: 6px;
 }
 
-.skills-fab-stack {
-  align-items: center;
-  bottom: 52px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: fixed;
-  right: 52px;
-  z-index: 10000;
-}
 
-.skills-fab {
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
 
-.skills-fab:hover {
-  box-shadow: 0 12px 20px rgba(var(--v-theme-primary), 0.4);
-  transform: translateY(-4px) scale(1.05);
-}
 
 .skill-description {
   display: -webkit-box;
@@ -2652,8 +2618,8 @@ export default {
 }
 
 .skills-upload-summary__chip--error {
-  background: #f2e6e2;
-  color: #8b5d54;
+  background: rgba(var(--v-theme-error), 0.12);
+  color: rgb(var(--v-theme-error));
 }
 
 .skills-upload-list {
@@ -2736,8 +2702,8 @@ export default {
 }
 
 .skills-status-chip--error {
-  background: #f2e6e2;
-  color: #8a5a50;
+  background: rgba(var(--v-theme-error), 0.12);
+  color: rgb(var(--v-theme-error));
 }
 
 .skills-status-chip--skipped {
@@ -2890,5 +2856,21 @@ export default {
   .skills-upload-dialog__description--body {
     font-size: 14px;
   }
+}
+@media (max-width: 600px) {
+  .skills-list-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .skills-list-title { font-size: 13px !important; margin: 0; }
+  .skills-search-wrap { min-width: 0; width: auto; }
+  .skills-list-actions { width: auto; margin: 0; gap: 4px; }
+  .skills-list-actions:has(> .v-btn:nth-child(2)) { grid-column: 1 / -1; justify-content: flex-end; }
+  .text-center.pa-8 { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 10px !important; font-size: 13px; }
+  .text-center.pa-8 > .v-icon { font-size: 32px !important; width: 32px !important; height: 32px !important; }
+  .text-center.pa-8 > p { margin: 0 !important; }
+}
+@media (max-width: 600px) {
+
+  .skills-list { gap: 6px; }
+  .skill-list-item :deep(.outlined-action-list-item__main) { gap: 4px 8px; }
+  .skill-list-item :deep(.outlined-action-list-item__actions) { gap: 0; }
 }
 </style>

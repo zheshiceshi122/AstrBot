@@ -339,4 +339,7 @@ export default defineComponent({
   z-index: 9999;
   pointer-events: none;
 }
+@media (max-width: 600px) {
+  .persona-card-content { padding: 10px 10px 4px 12px; gap: 6px; } .persona-card-content :deep(.v-btn--icon) { width: 44px; height: 44px; } .persona-meta { flex-direction: row; flex-wrap: wrap; gap: 5px 10px; padding: 4px 12px 10px; } .persona-name { white-space: normal; overflow-wrap: anywhere; }
+}
 </style>

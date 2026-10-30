@@ -1,6 +1,6 @@
 <template>
   <div class="config-workspace">
-    <nav class="config-workspace__nav" :aria-label="tm('title')">
+    <nav ref="sectionNav" class="config-workspace__nav" :aria-label="tm('title')">
       <button
         v-for="section in visibleSections"
         :key="section.key"
@@ -186,12 +186,27 @@ export default {
       if (!sectionKeys.includes(this.tab)) {
         this.tab = sectionKeys[0] ?? null;
       }
+    },
+    tab() {
+      this.revealActiveSection();
     }
   },
   mounted() {
     this.tab = this.visibleSections[0]?.key ?? null;
   },
   methods: {
+    revealActiveSection() {
+      // Reveal the selected tab without scrolling the page or its form.
+      this.$nextTick(() => {
+        const nav = this.$refs.sectionNav;
+        const active = nav?.querySelector(
+          '.config-workspace__nav-item--active'
+        );
+        if (!active) return;
+        const bounds = active.getBoundingClientRect();
+        nav.scrollBy({ left: bounds.left - nav.getBoundingClientRect().left - (nav.clientWidth - bounds.width) / 2 });
+      });
+    },
     getSectionIcon(sectionKey) {
       return SECTION_ICONS[sectionKey] || 'mdi-cog-outline';
     },
@@ -231,32 +246,40 @@ export default {
   --config-divider: rgba(17, 24, 39, 0.09);
   --config-form-divider: var(--config-divider);
   display: grid;
-  grid-template-columns: 126px minmax(0, 1fr);
-  gap: 34px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   align-items: start;
   min-width: 0;
 }
 
 .config-workspace__nav {
-  position: sticky;
-  top: calc(var(--v-layout-top, 64px) + 52px);
+  position: static;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
   gap: 5px;
   padding-top: 2px;
+  padding-bottom: 2px;
 }
+
+.config-workspace__nav::-webkit-scrollbar { display: none; }
 
 .config-workspace__nav-item {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
-  min-height: 34px;
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 40px;
   padding: 6px 9px 6px 12px;
-  border: 0;
+  border: 1px solid var(--config-border);
   border-radius: 8px;
-  background: transparent;
+  background: rgb(var(--v-theme-surface));
   color: rgba(var(--v-theme-on-surface), 0.64);
   cursor: pointer;
   font: inherit;
@@ -264,33 +287,23 @@ export default {
   font-weight: 680;
   line-height: 1.25;
   text-align: left;
+  white-space: nowrap;
 }
 
 .config-workspace__nav-item:hover {
-  background: rgba(var(--v-theme-on-surface), 0.045);
+  background: rgba(var(--v-theme-primary), 0.06);
   color: rgb(var(--v-theme-on-surface));
 }
 
-.config-workspace__nav-item--active {
-  background: rgba(var(--v-theme-on-surface), 0.07);
-  color: rgb(var(--v-theme-on-surface));
-  font-weight: 760;
-}
-
-.config-workspace__nav-item--active::before {
-  position: absolute;
-  top: 8px;
-  bottom: 8px;
-  left: 0;
-  width: 2px;
-  border-radius: 999px;
-  background: rgba(var(--v-theme-on-surface), 0.52);
-  content: '';
+.config-workspace__nav-item.config-workspace__nav-item--active {
+  background: var(--color-accent-soft);
+  color: rgb(var(--v-theme-primary));
+  font-weight: 720;
 }
 
 .config-workspace__main {
   width: 100%;
-  max-width: 680px;
+  max-width: none;
   min-width: 0;
 }
 
@@ -399,30 +412,16 @@ export default {
   text-decoration: none;
 }
 
-@media (max-width: 720px) {
-  .config-workspace {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-
-  .config-workspace__nav {
-    position: static;
-    flex-direction: row;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .config-workspace__main {
-    max-width: none;
-  }
-
-  .config-workspace__nav-item {
-    flex: 0 0 auto;
-    width: auto;
-    border: 1px solid var(--config-border);
-    background: rgb(var(--v-theme-surface));
-  }
+@media (max-width: 600px) {
+  .config-workspace { gap: 8px; }
+  .config-workspace__nav { gap: 4px; scroll-padding-inline: 4px; }
+  .config-workspace__nav-item { min-height: 40px; padding: 8px 10px; font-size: 12.5px; gap: 5px; }
+  .config-standard-section__heading { margin-bottom: 8px; }
+  .config-standard-section__title { font-size: 17px; }
+  .config-standard-section__groups :deep(.v-card), :deep(.config-product-groups .v-card) { margin-bottom: 10px !important; }
+  .config-standard-section__groups :deep(.config-section), :deep(.config-product-groups .config-section) { padding: 10px 10px 6px !important; }
+  .config-standard-section__groups :deep(.config-title), :deep(.config-product-groups .config-title) { font-size: 14px; }
+  .config-standard-section__groups :deep(.collapsed-config-toggle-row), :deep(.config-product-groups .collapsed-config-toggle-row) { padding: 8px 10px; }
 }
 </style>
 

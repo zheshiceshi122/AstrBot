@@ -1,5 +1,7 @@
 <template>
   <v-dialog
+    class="dashboard-form-dialog"
+    scrollable
     :model-value="!!platform"
     :persistent="deleting"
     max-width="480"

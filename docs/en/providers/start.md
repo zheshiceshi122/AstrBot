@@ -30,9 +30,17 @@ Using DeepSeek as an example, assuming you have registered and logged in to a De
 2. Click the "API Keys" menu in the left sidebar, create a new API Key, and copy the key.
 3. Click the "API Documentation" link near the bottom of the left sidebar to open the API documentation page.
 4. On the API documentation page, find the section about the "OpenAI-compatible interface" and note the API Base URL, for example `https://api.deepseek.com/v1`. (If there is no `/v1`, please add `/v1`.)
-5. Open **Providers → Chat Completion**, click **Add**, and select `DeepSeek`. For other OpenAI-compatible services, select `OpenAI Compatible`. Enter the provider name, `API Key`, and `API Base URL`.
-6. Click **Save and Fetch Models**, find the desired model, click `+`, and make sure it is enabled. If the model list cannot be fetched, click **Save Configuration**, then **Custom Model** and enter the model ID. Use **Test Model** beside the model to check connectivity.
-7. Open **Config**, select the profile to use, and go to **AI → Model**. Set **Chat Model** to the model you just added, then click **Save Configuration** at the bottom right. This setting is for AstrBot built-in AI.
+5. Open **Settings → Models & API → Chat Completion**, click **Add**, and select `DeepSeek`. For other OpenAI-compatible services, select `OpenAI Compatible`. Enter the provider name, `API Key`, and `API Base URL`.
+6. Enter a model ID, such as `deepseek-chat`, directly in **Model** on the same form. Alternatively, use **Fetch Models / Save and Fetch Models** near **Model** to fetch the list (connection changes are saved first), then search or select a model.
+7. Choose a **Chat configuration profile** and click **Save and use**. This saves the connection, adds the model, and applies it to that profile. Session-specific model overrides stay in effect.
+8. To save without switching, leave **Save model without switching** selected and click **Save API and model**. With no model entered, **Save Configuration** only saves the connection.
+9. Use the configured-model list below to test connectivity or edit model capabilities and context limits. Proxy and timeout settings remain under **Advanced Configuration**. Profiles using third-party agents are not automatically switched to AstrBot built-in AI.
+
+Expand **Setup help** for input guidance and profile scope details.
+
+
+The former **Custom Model → model settings dialog** flow is now the inline **Model** field. **Config → AI → Model → Chat Model** is still available; **Chat configuration profile → Save and use** provides the same selection on this page.
+
 
 ## Using Environment Variables to Load Keys
 

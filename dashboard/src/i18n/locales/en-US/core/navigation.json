@@ -5,7 +5,7 @@
   "providers": "Providers",
   "commands": "Commands",
   "persona": "Persona",
-  "data": "Data & Logs",
+  "data": "Workbench",
   "dataTabs": {
     "statistics": "Statistics",
     "conversations": "Conversations",
@@ -18,6 +18,8 @@
   "chat": "Chat",
   "botMode": "Bot",
   "options": "Options",
+  "copyLayoutInfo": "Copy layout information",
+  "layoutInfoHelp": "Sizes, safe areas and positions only; no chats or configuration",
   "cron": "Future Tasks",
   "extension": "Extensions",
   "extensionTabs": {
@@ -64,5 +66,36 @@
     "system": "System Config"
   },
   "pluginView": "Plugin Views",
-  "pluginViewType": "Plugin View"
+  "pluginViewType": "Plugin View",
+  "mobileExtensions": "Extensions",
+  "mobileSettings": "Settings",
+  "mobileNavigation": "Main navigation",
+  "sectionNavigation": "Section navigation",
+  "modelsAndApi": "Models & API",
+  "retry": "Reload",
+  "computerAccessScope": "Applies to the default profile. Changes are saved immediately.",
+  "computerAccessSandbox": "Currently using a sandbox. Turning this off disables computer use; turning it back on selects the local environment.",
+  "hubGroups": {
+    "dialogue": "Conversation setup",
+    "tools": "Plugins & tools"
+  },
+  "hubHints": {
+    "providers": "Set up endpoints, API keys and available models.",
+    "config": "Manage models, responses and capabilities for each profile.",
+    "general": "Runtime, timezone and storage cleanup.",
+    "appearance": "Customize interface colors.",
+    "network": "Connections, download mirrors and proxies.",
+    "security": "Dashboard access and security options.",
+    "maintenance": "Backups, recovery, diagnostics and maintenance.",
+    "openapi": "Manage API keys for external applications.",
+    "resources": "Documentation, FAQs and release notes.",
+    "about": "Version and project information.",
+    "persona": "Edit character settings and conversation style.",
+    "knowledgeBase": "Manage documents and knowledge retrieval.",
+    "extension": "Install, configure and manage plugins.",
+    "mcp": "Connect external tool services.",
+    "skills": "Manage skills available to agents.",
+    "components": "Manage commands and other plugin behaviors.",
+    "subagent": "Configure subagents and task delegation."
+  }
 }

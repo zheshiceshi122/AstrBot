@@ -1151,13 +1151,22 @@ function showError(error) {
 }
 
 @media (max-width: 600px) {
+  .bot-editor__header {
+    gap: 8px;
+    padding: 12px;
+  }
+
   .bot-editor__actions {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
   }
 
   .bot-editor__actions :deep(.v-btn) {
-    width: 100%;
+    width: auto;
+  }
+
+  .bot-editor__section {
+    padding: 12px;
   }
 
   .bot-editor__section-head,

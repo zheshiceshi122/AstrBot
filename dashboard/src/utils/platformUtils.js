@@ -37,7 +37,8 @@ export function getPlatformIcon(name) {
   } else if (name === 'kook') {
     return new URL('@/assets/images/platform_logos/kook.png', import.meta.url).href
   } else if (name === 'vocechat') {
-    return new URL('@/assets/images/platform_logos/vocechat.png', import.meta.url).href
+    // No VoceChat logo is bundled; use the application fallback instead of a 404.
+    return '/favicon.svg'
   } else if (name === 'satori' || name === 'Satori') {
     return new URL('@/assets/images/platform_logos/satori.png', import.meta.url).href
   } else if (name === 'misskey') {

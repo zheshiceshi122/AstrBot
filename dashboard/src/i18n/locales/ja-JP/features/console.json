@@ -67,5 +67,7 @@
   },
   "debugHint": {
     "text": "Debug ログは「設定ファイル → システム → コンソールログレベル」で有効にできます"
-  }
+  },
+  "fullscreen": "ログを全画面表示",
+  "exitFullscreen": "全画面表示を終了"
 }

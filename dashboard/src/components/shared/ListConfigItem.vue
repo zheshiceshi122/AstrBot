@@ -3,6 +3,8 @@
     <div v-if="isSingleItemMode" class="flex-grow-1 d-flex align-center ga-2">
       <v-text-field
         v-model="singleItemValue"
+        :label="label || undefined"
+        :aria-label="label || undefined"
         :type="secretInputType"
         :append-inner-icon="secretToggleIcon"
         :autocomplete="secret ? 'new-password' : undefined"
@@ -32,7 +34,7 @@
   </div>
 
   <!-- List Management Dialog -->
-  <v-dialog v-model="dialog" max-width="600px">
+  <v-dialog class="dashboard-form-dialog list-editor-dialog" v-model="dialog" max-width="600px" scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ dialogTitle || t('core.common.list.editTitle') }}
@@ -40,7 +42,7 @@
       
       <!-- Add new item section - moved to top -->
       <v-card-text class="pa-4 pb-2">
-        <div class="d-flex align-center ga-2">
+        <div class="list-entry-controls d-flex align-center ga-2">
           <v-text-field 
             v-model="newItem" 
             :type="secretInputType"
@@ -66,11 +68,13 @@
           </v-btn>
           <v-btn 
             @click="showBatchImport = true" 
+            :aria-label="t('core.common.list.batchImport')"
+            class="list-batch-action"
             variant="tonal" 
             color="primary"
             size="small">
             <v-icon size="small">mdi-import</v-icon>
-            {{ t('core.common.list.batchImport') }}
+            <span class="list-batch-label">{{ t('core.common.list.batchImport') }}</span>
           </v-btn>
         </div>
       </v-card-text>
@@ -141,7 +145,7 @@
   </v-dialog>
 
   <!-- Batch Import Dialog -->
-  <v-dialog v-model="showBatchImport" max-width="600px">
+  <v-dialog class="dashboard-form-dialog" v-model="showBatchImport" max-width="600px" scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ t('core.common.list.batchImportTitle') }}
@@ -374,5 +378,12 @@ function cancelBatchImport() {
 
 .secret-textarea :deep(textarea) {
   -webkit-text-security: disc;
+}
+
+@media (max-width: 600px) {
+  .list-entry-controls > .v-input { min-width: 0; }
+  .list-entry-controls > .v-btn { flex-shrink: 0; }
+  .list-batch-label { display: none; }
+  .list-batch-action { width: 40px; min-width: 40px; padding-inline: 0; }
 }
 </style>

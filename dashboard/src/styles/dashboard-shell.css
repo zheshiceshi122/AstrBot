@@ -273,11 +273,33 @@
 
 @media (max-width: 640px) {
   .dashboard-overview-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .dashboard-card--padded,
   .dashboard-overview-card {
-    padding: 18px;
+    padding: 12px;
   }
+  .dashboard-shell { padding: 8px !important; }
+  .dashboard-header, .dashboard-section-head { gap: 10px; margin-bottom: 14px; }
+  .dashboard-title { font-size: 20px; }
+  .dashboard-subtitle { font-size: 13px; line-height: 1.5; }
+  .dashboard-pill { padding: 6px 10px; }
+  .dashboard-form-grid { gap: 8px; }
+}
+
+@media (max-width: 600px) {
+  .dashboard-header.page-toolbar { flex-direction: row; align-items: flex-start; gap: 4px; margin-bottom: 10px; }
+  .dashboard-title { font-size: 18px; }
+  .dashboard-subtitle, .dashboard-section-subtitle { font-size: 12px; line-height: 1.45; }
+  .dashboard-header-actions { flex-wrap: nowrap; gap: 2px; }
+  .dashboard-section-head { flex-direction: row; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .dashboard-section-title { font-size: 15px; }
+}
+
+@media (max-width: 600px) {
+  .dashboard-action-label { display: none; }
+  .dashboard-header-actions .v-btn { width: 32px; padding: 0 !important; }
+  .dashboard-header.page-toolbar > .page-toolbar__content { flex: 1; }
+  .dashboard-header .dashboard-subtitle { margin: 0; }
 }

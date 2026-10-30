@@ -11,7 +11,7 @@
 
     <!-- 文档列表 -->
     <v-card variant="outlined">
-      <v-data-table-server :headers="headers" :items="documents" :loading="loading"
+      <v-data-table-server :mobile="$vuetify.display.xs" density="compact" :headers="headers" :items="documents" :loading="loading"
         :items-per-page-options="[10, 25, 50, 100]"
         :items-per-page="pageSize" :page="page" :items-length="total"
         @update:page="onPageChange" @update:items-per-page="onItemsPerPageChange">
@@ -60,7 +60,7 @@
     </v-card>
 
     <!-- 上传对话框 -->
-    <v-dialog v-model="showUploadDialog" max-width="650px" persistent @after-enter="initUploadSettings">
+    <v-dialog class="dashboard-form-dialog" v-model="showUploadDialog" max-width="650px" persistent @after-enter="initUploadSettings">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <span>{{ t('upload.title') }}</span>
@@ -207,7 +207,7 @@
     </v-dialog>
 
     <!-- 删除确认对话框 -->
-    <v-dialog v-model="showDeleteDialog" max-width="450px">
+    <v-dialog class="dashboard-form-dialog" v-model="showDeleteDialog" max-width="450px">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ t('documents.delete') }}</v-card-title>
         <v-card-text class="pa-6">
@@ -893,5 +893,8 @@ onUnmounted(() => {
   .action-bar>* {
     width: 100%;
   }
+}
+@media (max-width: 600px) {
+  .action-bar { flex-wrap: wrap; gap: 8px; } .action-bar :deep(.v-input) { flex: 1 1 160px; max-width: none !important; } .documents-tab :deep(.v-data-table__td) { padding: 6px 10px; } .documents-tab :deep(.v-data-table__td-value) { min-width: 0; overflow-wrap: anywhere; }
 }
 </style>

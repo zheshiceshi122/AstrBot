@@ -102,4 +102,13 @@ const changeLanguage = async (langCode: string) => {
   /* 继承action-btn样式，与工具栏主题按钮保持一致 */
 }
 
+/* 登录页：语言按钮跟随移动端 40px 触控高度。 */
+@media (max-width: 600px) {
+  .language-switcher--default {
+    min-width: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+
 </style> 

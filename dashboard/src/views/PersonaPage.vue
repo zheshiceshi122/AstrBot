@@ -30,4 +30,7 @@ export default {
     padding: 16px;
   }
 }
+@media (max-width: 600px) {
+  .persona-page { padding: 6px; }
+}
 </style>

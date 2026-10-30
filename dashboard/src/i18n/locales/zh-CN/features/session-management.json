@@ -1,4 +1,4 @@
-﻿{
+{
   "title": "自定义规则",
   "subtitle": "为特定会话设置自定义规则，优先级高于全局配置",
   "buttons": {
@@ -39,7 +39,8 @@
       "umoInfo": "消息会话来源",
       "rulesOverview": "规则概览",
       "actions": "操作"
-    }
+    },
+    "selectAll": "全选本页"
   },
   "persona": {
     "none": "跟随配置文件"

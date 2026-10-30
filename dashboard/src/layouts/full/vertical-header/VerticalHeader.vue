@@ -17,7 +17,7 @@ import { router } from "@/router";
 import { useRoute } from "vue-router";
 import { useDisplay, useTheme } from "vuetify";
 import StyledMenu from "@/components/shared/StyledMenu.vue";
-import { Menu } from "@lucide/vue";
+import { Menu, ChevronLeft, EllipsisVertical } from "@lucide/vue";
 import { Minus, Square, X } from "@lucide/vue";
 import DesktopUpdateProgress from "@/components/shared/DesktopUpdateProgress.vue";
 import { useLanguageSwitcher } from "@/i18n/composables";
@@ -25,15 +25,20 @@ import type { Locale } from "@/i18n/types";
 import AboutPage from "@/views/AboutPage.vue";
 import { authApi, isLegacyFallbackError, statsApi, updatesApi } from "@/api/v1";
 import { getDesktopRuntimeInfo } from "@/utils/desktopRuntime";
+import { readMobileLayoutSnapshot } from "@/utils/mobileLayoutSnapshot";
+import { copyToClipboard } from "@/utils/clipboard";
+import { useToastStore } from "@/stores/toast";
 
 enableKatex();
 enableMermaid();
+defineProps<{ mobileNavigation?: boolean; mobileBackLink?: { to: string; key: string } }>();
 
 const customizer = useCustomizerStore();
 const commonStore = useCommonStore();
 const authStore = useAuthStore();
 const chatHeader = useChatHeaderStore();
 const headerContext = useHeaderContextStore();
+const mergedMobileHeader = computed(() => headerContext.compactMobile && !!headerContext.mobileActionsTarget);
 const mobileDrawer = useMobileDrawerStore();
 
 /** Windows hides the native title bar, so the header draws its own caption buttons. */
@@ -1038,6 +1043,17 @@ const currentMode = computed({
 });
 
 const mainMenuOpen = ref(false);
+const toastStore = useToastStore();
+async function copyLayoutInfo() {
+  try {
+    const text = JSON.stringify(readMobileLayoutSnapshot(), null, 2);
+    mainMenuOpen.value = false;
+    const copied = await copyToClipboard(text);
+    toastStore.add({ message: t(copied ? 'core.common.copied' : 'core.common.copyFailed'), color: copied ? 'success' : 'error' });
+  } catch {
+    toastStore.add({ message: t('core.common.copyFailed'), color: 'error' });
+  }
+}
 const nextMode = computed<"chat" | "bot">(() =>
   isChatPath.value ? "bot" : "chat",
 );
@@ -1082,8 +1098,9 @@ onMounted(async () => {
 
 <template>
   <v-app-bar
+    v-show="!mergedMobileHeader"
     elevation="0"
-    height="40"
+    :height="mergedMobileHeader ? 0 : 40"
     data-tauri-drag-region
     class="top-header"
     :class="{
@@ -1093,9 +1110,12 @@ onMounted(async () => {
     :absolute="isChatPath"
     :style="chatHeaderStyle"
   >
+    <v-btn v-if="mobileNavigation && mobileBackLink" :to="mobileBackLink.to" variant="text" class="header-back-link">
+      <ChevronLeft :size="18" aria-hidden="true" />{{ t(`core.navigation.${mobileBackLink.key}`) }}
+    </v-btn>
     <!-- Mobile: open the navigation drawer (sidebars become temporary overlays). -->
     <v-btn
-      v-if="$vuetify.display.smAndDown"
+      v-if="$vuetify.display.smAndDown && !mobileNavigation"
       class="header-menu-btn"
       icon
       rounded="lg"
@@ -1171,13 +1191,14 @@ onMounted(async () => {
       </v-btn>
 
       <!-- 功能菜单 -->
+      <Teleport :disabled="!mergedMobileHeader" :to="headerContext.mobileActionsTarget || 'body'">
       <StyledMenu v-model="mainMenuOpen" offset="12" location="bottom end">
         <template v-slot:activator="{ props: activatorProps }">
           <v-btn
             v-bind="activatorProps"
             size="small"
             :class="[
-              'action-btn',
+              'action-btn global-options-button',
               isChatPath ? 'chat-action-btn' : 'mr-4',
             ]"
             :color="isChatPath ? undefined : 'var(--v-theme-surface)'"
@@ -1185,11 +1206,12 @@ onMounted(async () => {
             rounded="sm"
             icon
             :ripple="false"
+            :aria-label="t('core.navigation.options')"
+            :title="t('core.navigation.options')"
           >
             <v-badge :model-value="hasAvailableUpdate" color="primary" dot floating>
-              <v-icon>mdi-dots-vertical</v-icon>
+              <EllipsisVertical :size="18" aria-hidden="true" />
             </v-badge>
-            <span class="header-toolbar-label">{{ t("core.navigation.options") }}</span>
           </v-btn>
         </template>
 
@@ -1220,6 +1242,11 @@ onMounted(async () => {
           <v-divider class="my-1" />
         </template>
 
+        <v-list-item class="styled-menu-item" rounded="md" @click="copyLayoutInfo">
+          <template #prepend><v-icon>mdi-content-copy</v-icon></template>
+          <v-list-item-title>{{ t('core.navigation.copyLayoutInfo') }}</v-list-item-title>
+          <v-list-item-subtitle>{{ t('core.navigation.layoutInfoHelp') }}</v-list-item-subtitle>
+        </v-list-item>
         <!-- 语言切换分组 -->
         <v-menu
           open-on-click
@@ -1388,6 +1415,7 @@ onMounted(async () => {
         </v-list-item-title>
       </v-list-item>
       </StyledMenu>
+      </Teleport>
       <!-- Custom caption buttons on Windows, where the native title bar is disabled. -->
       <div v-if="isWindowsDesktop" class="header-caption-btns">
         <v-btn
@@ -2105,8 +2133,8 @@ onMounted(async () => {
   flex: 0 1 auto;
 }
 
-.top-header.chat-mode-header {
-  background: var(--astrbot-chrome-bg, #fdfcfc) !important;
+.top-header {
+  background: var(--astrbot-chrome-bg, #f7f4ed) !important;
   border-bottom: 0;
   box-shadow: none !important;
 }
@@ -2587,7 +2615,6 @@ html[data-astrbot-desktop-platform='macos'] .top-header.chat-mode-header.chat-mo
   width: 100% !important;
 }
 
-
 .top-header .v-toolbar__content {
   padding-inline-end: 24px !important;
 }
@@ -2611,10 +2638,6 @@ html[data-astrbot-desktop-platform='macos'] .top-header.chat-mode-header.chat-mo
   color: rgba(var(--v-theme-on-surface), 0.9);
 }
 
-.header-toolbar-label {
-  display: inline;
-  margin-inline-start: 6px;
-}
 
 .top-header .header-actions .v-btn {
   height: 34px;
@@ -2658,11 +2681,6 @@ html[data-astrbot-desktop-platform='macos'] .top-header.chat-mode-header.chat-mo
 }
 
 .top-header .header-actions .v-btn .mode-switch-label,
-.top-header .header-actions .v-btn .header-toolbar-label {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-}
 
 /* Keep the two header variants on the same right edge. The bot view used a
    Vuetify mr-4 utility while chat used the action button's 6px margin, which

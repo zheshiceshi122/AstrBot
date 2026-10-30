@@ -1,12 +1,12 @@
-﻿<template>
-  <div class="session-management-page">
+<template>
+  <div class="session-management-page" :class="{ 'is-empty-rules': totalItems === 0 }">
     <v-container fluid class="pa-0">
       <v-card flat>
-        <v-card-title class="d-flex align-center py-3 px-4">
+        <v-card-title class="rules-toolbar d-flex align-center py-3 px-4">
           <span class="text-h4">{{ tm('customRules.title') }}</span>
-          <v-btn icon="mdi-information-outline" size="small" variant="text" href="https://docs.astrbot.app/use/custom-rules.html" target="_blank"></v-btn>
+          <v-btn class="rules-help-btn" icon="mdi-information-outline" size="small" variant="text" href="https://docs.astrbot.app/use/custom-rules.html" target="_blank"></v-btn>
           <v-chip size="small" class="ml-1">{{ totalItems }} {{ tm('customRules.rulesCount') }}</v-chip>
-          <v-row class="me-4 ms-4" dense>
+          <v-row class="rules-search me-4 ms-4" dense>
             <v-text-field
               v-model="searchQuery"
               prepend-inner-icon="mdi-magnify"
@@ -22,18 +22,112 @@
           <v-btn v-if="selectedItems.length > 0" color="error" prepend-icon="mdi-delete" variant="tonal" @click="confirmBatchDelete" class="mr-2" size="small">
             {{ tm('buttons.batchDelete') }} ({{ selectedItems.length }})
           </v-btn>
-          <v-btn color="success" prepend-icon="mdi-plus" variant="tonal" @click="openAddRuleDialog" class="mr-2" size="small">
-            {{ tm('buttons.addRule') }}
+          <v-btn v-if="totalItems > 0" color="success" prepend-icon="mdi-plus" variant="tonal" @click="openAddRuleDialog" class="mr-2 add-rule-btn" size="small" :aria-label="tm('buttons.addRule')" :title="tm('buttons.addRule')">
+            <span class="add-rule-label">{{ tm('buttons.addRule') }}</span>
           </v-btn>
-          <v-btn color="primary" prepend-icon="mdi-refresh" variant="tonal" @click="refreshData" :loading="loading" size="small">
-            {{ tm('buttons.refresh') }}
+          <v-btn color="primary" prepend-icon="mdi-refresh" variant="tonal" @click="refreshData" :loading="loading" size="small" class="refresh-rules-btn" :aria-label="tm('buttons.refresh')" :title="tm('buttons.refresh')">
+            <span class="refresh-rules-label">{{ tm('buttons.refresh') }}</span>
           </v-btn>
         </v-card-title>
 
         <v-divider></v-divider>
 
         <v-card-text class="pa-0">
+          <!-- Phone layout: one compact card per rule instead of the table's
+               label/value rows, which repeated every field name and made each
+               rule several hundred pixels tall. -->
+          <div v-if="$vuetify.display.xs" class="rules-mobile-list">
+            <div v-if="loading && rulesList.length === 0" class="rules-mobile-loading">
+              <v-progress-circular indeterminate size="28" width="3" />
+            </div>
+            <div v-else-if="rulesList.length === 0" class="rules-mobile-empty">
+              <v-icon size="56" color="grey-lighten-1">mdi-file-document-edit-outline</v-icon>
+              <div class="rules-mobile-empty__title">{{ tm('customRules.noRules') }}</div>
+              <div class="rules-mobile-empty__desc">{{ tm('customRules.noRulesDesc') }}</div>
+              <v-btn color="primary" variant="tonal" prepend-icon="mdi-plus" @click="openAddRuleDialog">
+                {{ tm('buttons.addRule') }}
+              </v-btn>
+            </div>
+            <template v-else>
+            <label class="rules-mobile-selectall">
+              <v-checkbox-btn
+                :model-value="mobileAllSelected"
+                :indeterminate="mobileSomeSelected && !mobileAllSelected"
+                density="compact"
+                hide-details
+                @update:model-value="toggleMobileSelectAll"
+              />
+              <span>{{ tm('table.selectAll') }}</span>
+            </label>
+
+            <article v-for="item in rulesList" :key="item.umo" class="rule-mobile-card">
+              <div class="rule-mobile-card__head">
+                <v-checkbox-btn
+                  class="rule-mobile-card__check"
+                  :model-value="isMobileRuleSelected(item)"
+                  density="compact"
+                  hide-details
+                  :aria-label="tm('table.selectAll')"
+                  @update:model-value="toggleMobileRule(item, $event)"
+                />
+                <UmoDisplay
+                  class="rule-mobile-card__identity"
+                  :umo="item.umo"
+                  :platform="item.platform"
+                  :message-type="item.message_type"
+                  :session-id="item.session_id"
+                  :auto-name="item.auto_name"
+                  :user-alias="item.user_alias"
+                  :custom-name="item.rules?.session_service_config?.custom_name"
+                  :show-info="false"
+                  two-line-title
+                />
+                <div class="rule-mobile-card__actions">
+                  <v-btn icon size="small" variant="text" color="primary"
+                    :aria-label="tm('buttons.editRule')" :title="tm('buttons.editRule')"
+                    @click="openRuleEditor(item)">
+                    <v-icon size="20">mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn icon size="small" variant="text" color="error"
+                    :aria-label="tm('buttons.deleteAllRules')" :title="tm('buttons.deleteAllRules')"
+                    @click="confirmDeleteRules(item)">
+                    <v-icon size="20">mdi-delete</v-icon>
+                  </v-btn>
+                </div>
+              </div>
+
+              <div v-if="hasAnyRuleConfig(item.rules)" class="rule-mobile-card__badges">
+                <v-chip v-if="item.rules.session_service_config" size="x-small" color="primary" variant="tonal">
+                  {{ tm('customRules.serviceConfig') }}
+                </v-chip>
+                <v-chip v-if="item.rules.session_plugin_config" size="x-small" color="secondary" variant="tonal">
+                  {{ tm('customRules.pluginConfig') }}
+                </v-chip>
+                <v-chip v-if="item.rules.kb_config" size="x-small" color="info" variant="tonal">
+                  {{ tm('customRules.kbConfig') }}
+                </v-chip>
+                <v-chip v-if="hasProviderConfig(item.rules)" size="x-small" color="warning" variant="tonal">
+                  {{ tm('customRules.providerConfig') }}
+                </v-chip>
+              </div>
+            </article>
+
+            <v-pagination
+              v-if="totalItems > itemsPerPage"
+              v-model="currentPage"
+              :length="Math.ceil(totalItems / itemsPerPage)"
+              :total-visible="3"
+              class="rules-mobile-pagination"
+              @update:model-value="loadData"
+            />
+            </template>
+          </div>
+
           <v-data-table-server
+            v-show="!$vuetify.display.xs"
+            :mobile="$vuetify.display.xs"
+            :hide-default-header="$vuetify.display.xs"
+            density="compact"
             :headers="headers"
             :items="filteredRulesList"
             :loading="loading"
@@ -49,6 +143,9 @@
             item-value="umo"
             return-object
           >
+            <template v-if="$vuetify.display.xs && totalItems > 0" #top="{ allSelected, someSelected, selectAll }">
+              <v-checkbox :model-value="allSelected" :indeterminate="someSelected && !allSelected" :label="tm('table.selectAll')" density="compact" hide-details class="px-3" @update:model-value="selectAll" />
+            </template>
             <!-- UMO 信息 -->
             <template v-slot:item.umo_info="{ item }">
               <UmoDisplay
@@ -60,6 +157,7 @@
                 :user-alias="item.user_alias"
                 :custom-name="item.rules?.session_service_config?.custom_name"
                 editable
+                two-line-title
                 :edit-tooltip="tm('buttons.editCustomName')"
                 @edit="openQuickEditName(item)"
               />
@@ -114,8 +212,8 @@
           </v-data-table-server>
         </v-card-text>
       </v-card>
-      <!-- 批量操作面板 -->
-      <v-card flat class="mt-4">
+      <!-- 批量操作面板：没有会话可作用时不占用首屏 -->
+      <v-card v-if="totalItems > 0" flat class="mt-4">
         <v-card-title class="d-flex align-center py-3 px-4">
           <span class="text-h6">{{ tm('batchOperations.title') }}</span>
           <v-chip size="small" class="ml-2" color="info" variant="outlined">
@@ -195,7 +293,7 @@
       </v-card>
 
       <!-- 分组管理面板 -->
-      <v-card flat class="mt-4">
+      <v-card v-if="totalItems > 0 || groups.length > 0" flat class="mt-4">
         <v-card-title class="d-flex align-center py-3 px-4">
           <span class="text-h6">{{ tm('groups.title') }}</span>
           <v-chip size="small" class="ml-2" color="secondary" variant="outlined">
@@ -252,7 +350,7 @@
       </v-card>
 
       <!-- 分组编辑对话框 -->
-      <v-dialog v-model="groupDialog" max-width="800">
+      <v-dialog class="dashboard-form-dialog" v-model="groupDialog" max-width="800">
         <v-card>
           <v-card-title class="text-h3 pa-4 pb-0 pl-6">
             {{ groupDialogMode === 'create' ? tm('groups.create') : tm('groups.edit') }}
@@ -281,13 +379,17 @@
         @loaded="mergeUmoInfos"
         @update:model-value="createNewRule"
       >
-        <template #activator />
+        <!-- Opened programmatically from "add rule"; an empty template is
+             treated as no slot, so keep a hidden, inert activator. -->
+        <template #activator>
+          <span class="add-rule-umo-activator" aria-hidden="true" />
+        </template>
       </UmoSelector>
 
       <!-- 规则编辑对话框 -->
-      <v-dialog v-model="ruleDialog" max-width="550" scrollable>
-        <v-card v-if="selectedUmo" class="d-flex flex-column" height="600">
-          <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center border-b">
+      <v-dialog class="dashboard-form-dialog" v-model="ruleDialog" max-width="550" scrollable>
+        <v-card v-if="selectedUmo" class="rule-editor-card d-flex flex-column" height="600">
+          <v-card-title class="rule-editor-title text-h3 pa-4 pb-0 pl-6 d-flex align-center border-b">
             <span>{{ tm('ruleEditor.title') }}</span>
             <v-chip size="x-small" class="ml-2 font-weight-regular" variant="outlined">
               {{ selectedUmo.umo }}
@@ -307,13 +409,13 @@
 
               <v-row dense>
                 <v-col cols="12">
-                  <v-checkbox v-model="serviceConfig.session_enabled" :label="tm('ruleEditor.serviceConfig.sessionEnabled')" color="success" hide-details class="mb-2" />
+                  <v-checkbox density="compact" v-model="serviceConfig.session_enabled" :label="tm('ruleEditor.serviceConfig.sessionEnabled')" color="success" hide-details class="mb-2" />
                 </v-col>
-                <v-col cols="12" md="6">
-                  <v-checkbox v-model="serviceConfig.llm_enabled" :label="tm('ruleEditor.serviceConfig.llmEnabled')" color="primary" hide-details />
+                <v-col cols="6">
+                  <v-checkbox density="compact" v-model="serviceConfig.llm_enabled" :label="tm('ruleEditor.serviceConfig.llmEnabled')" color="primary" hide-details />
                 </v-col>
-                <v-col cols="12" md="6">
-                  <v-checkbox v-model="serviceConfig.tts_enabled" :label="tm('ruleEditor.serviceConfig.ttsEnabled')" color="secondary" hide-details />
+                <v-col cols="6">
+                  <v-checkbox density="compact" v-model="serviceConfig.tts_enabled" :label="tm('ruleEditor.serviceConfig.ttsEnabled')" color="secondary" hide-details />
                 </v-col>
                 <v-col cols="12" class="mt-2">
                   <v-text-field v-model="serviceConfig.custom_name" :label="tm('ruleEditor.serviceConfig.customName')" variant="outlined" hide-details clearable />
@@ -472,11 +574,11 @@
                     clearable
                   />
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col cols="6">
                   <v-text-field v-model.number="kbConfig.top_k" :label="tm('ruleEditor.kbConfig.topK')" variant="outlined" hide-details type="number" min="1" max="20" class="mt-3" />
                 </v-col>
-                <v-col cols="12" md="6">
-                  <v-checkbox v-model="kbConfig.enable_rerank" :label="tm('ruleEditor.kbConfig.enableRerank')" color="primary" hide-details class="mt-3" />
+                <v-col cols="6">
+                  <v-checkbox density="compact" v-model="kbConfig.enable_rerank" :label="tm('ruleEditor.kbConfig.enableRerank')" color="primary" hide-details class="mt-3" />
                 </v-col>
               </v-row>
 
@@ -491,7 +593,7 @@
       </v-dialog>
 
       <!-- 确认删除对话框 -->
-      <v-dialog v-model="deleteDialog" max-width="400">
+      <v-dialog class="dashboard-form-dialog" v-model="deleteDialog" max-width="400">
         <v-card>
           <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ tm('deleteConfirm.title') }}</v-card-title>
           <v-card-text>
@@ -508,7 +610,7 @@
       </v-dialog>
 
       <!-- 批量删除确认对话框 -->
-      <v-dialog v-model="batchDeleteDialog" max-width="500">
+      <v-dialog class="dashboard-form-dialog" v-model="batchDeleteDialog" max-width="500">
         <v-card>
           <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ tm('batchDeleteConfirm.title') }}</v-card-title>
           <v-card-text>
@@ -535,7 +637,7 @@
       </v-snackbar>
 
       <!-- 快速编辑备注名对话框 -->
-      <v-dialog v-model="quickEditNameDialog" max-width="400">
+      <v-dialog class="dashboard-form-dialog" v-model="quickEditNameDialog" max-width="400">
         <v-card>
           <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ tm('quickEditName.title') }}</v-card-title>
           <v-card-text class="pa-4">
@@ -708,6 +810,16 @@ export default {
     filteredRulesList() {
       // 搜索已移至服务端，直接返回 rulesList
       return this.rulesList
+    },
+
+    mobileAllSelected() {
+      return this.rulesList.length > 0 && this.rulesList.every((rule) =>
+        this.selectedItems.some((selected) => selected.umo === rule.umo))
+    },
+
+    mobileSomeSelected() {
+      return this.rulesList.some((rule) =>
+        this.selectedItems.some((selected) => selected.umo === rule.umo))
     },
 
     personaOptions() {
@@ -911,6 +1023,38 @@ export default {
 
     hasProviderConfig(rules) {
       return rules && (rules['provider_perf_chat_completion'] || rules['provider_perf_speech_to_text'] || rules['provider_perf_text_to_speech'])
+    },
+
+    hasAnyRuleConfig(rules) {
+      return Boolean(
+        rules?.session_service_config ||
+        rules?.session_plugin_config ||
+        rules?.kb_config ||
+        this.hasProviderConfig(rules)
+      )
+    },
+
+    isMobileRuleSelected(item) {
+      return this.selectedItems.some((selected) => selected.umo === item.umo)
+    },
+
+    toggleMobileRule(item, selected) {
+      if (selected) {
+        if (!this.isMobileRuleSelected(item)) this.selectedItems.push(item)
+      } else {
+        this.selectedItems = this.selectedItems.filter((selectedItem) => selectedItem.umo !== item.umo)
+      }
+    },
+
+    toggleMobileSelectAll(selected) {
+      if (selected) {
+        for (const item of this.rulesList) {
+          if (!this.isMobileRuleSelected(item)) this.selectedItems.push(item)
+        }
+        return
+      }
+      const pageUmos = new Set(this.rulesList.map((item) => item.umo))
+      this.selectedItems = this.selectedItems.filter((item) => !pageUmos.has(item.umo))
     },
 
     parseUmoInfo(umo) {
@@ -1590,6 +1734,8 @@ export default {
 </script>
 
 <style scoped>
+.add-rule-umo-activator { display: none; }
+
 .v-data-table :deep(.v-data-table__td) {
   padding: 8px 16px !important;
   vertical-align: middle !important;
@@ -1602,4 +1748,86 @@ code {
   font-size: 12px;
 }
 
+@media (max-width: 600px) {
+  .rules-toolbar { flex-wrap: wrap; gap: 6px; white-space: normal; padding: 8px !important; }
+  .rules-search { flex: 1 0 100%; order: 2; margin: 2px 0 0 !important; }
+  .rules-search :deep(.v-input) { margin: 0 !important; }
+  /* Keep the title row on one line: the two recurring actions become icons
+     with the same 40px hit area, while the empty state keeps its labeled
+     create button. */
+  .add-rule-btn .add-rule-label,
+  .refresh-rules-btn .refresh-rules-label { display: none; }
+  .add-rule-btn,
+  .refresh-rules-btn { min-width: 40px !important; padding-inline: 8px !important; }
+  .session-management-page :deep(.v-card-title) { flex-wrap: wrap; gap: 6px; white-space: normal; }
+  .session-management-page :deep(.v-card-text) { padding: 12px; }
+  .session-management-page :deep(.v-data-table__td) { padding: 6px 10px !important; min-width: 0; }
+  .session-management-page :deep(.v-data-table__td-value) { min-width: 0; max-width: 100%; }
+  /* No rows means no pagination or "select all" row worth showing. */
+  .session-management-page.is-empty-rules :deep(.v-data-table-footer) { display: none; }
+
+  /* Phone card list */
+  .rules-mobile-list { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; }
+  .rules-mobile-loading { display: flex; justify-content: center; padding: 40px 0; }
+  .rules-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 36px 20px;
+    text-align: center;
+  }
+  .rules-mobile-empty__title { font-size: 15px; font-weight: 600; }
+  .rules-mobile-empty__desc { font-size: 13px; line-height: 1.5; color: rgba(var(--v-theme-on-surface), .66); }
+  .rules-mobile-empty .v-btn { margin-top: 6px; }
+
+  .rules-mobile-selectall {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 40px;
+    padding-inline: 2px;
+    font-size: 13px;
+    color: rgba(var(--v-theme-on-surface), .78);
+  }
+
+  .rule-mobile-card {
+    border: 1px solid rgba(var(--v-theme-on-surface), .1);
+    border-radius: 12px;
+    background: rgb(var(--v-theme-surface));
+    padding: 8px 10px 10px;
+  }
+
+  .rule-mobile-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .rule-mobile-card__check { flex: 0 0 auto; margin-top: 2px; }
+  .rule-mobile-card__identity { flex: 1 1 auto; min-width: 0; }
+  .rule-mobile-card__identity :deep(.umo-display__umo) { display: none; }
+
+  .rule-mobile-card__actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0;
+    margin: -4px -6px 0 0;
+  }
+
+  .rule-mobile-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    padding-left: 28px;
+  }
+
+  .rules-mobile-pagination { justify-content: center; margin-top: 6px; }
+}
+@media (max-width: 360px) {
+  .rules-help-btn { display: none; }
+}
 </style>

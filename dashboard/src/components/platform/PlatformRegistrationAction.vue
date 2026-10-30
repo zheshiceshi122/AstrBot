@@ -341,7 +341,9 @@ export default {
 
 <style scoped>
 .platform-registration-panel {
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;

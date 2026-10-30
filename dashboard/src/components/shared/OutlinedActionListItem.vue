@@ -145,4 +145,19 @@ const handleClick = (event) => {
     pointer-events: auto;
   }
 }
+@media (max-width: 600px) {
+  .outlined-action-list-item__main { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; min-height: 60px; gap: 8px; padding: 10px 12px; }
+  .outlined-action-list-item__title { font-size: 14px; white-space: normal; overflow-wrap: anywhere; }
+  .outlined-action-list-item__header { gap: 4px; margin-bottom: 4px; }
+  .outlined-action-list-item__actions, .outlined-action-list-item__hover-actions { gap: 0; max-width: 88px; flex-wrap: wrap; justify-content: flex-end; }
+  .outlined-action-list-item__actions :deep(.v-btn--icon) { width: 32px; height: 32px; }
+}
+@media (max-width: 600px) {
+  .outlined-action-list-item__main { padding: 8px 10px; gap: 4px 8px; }
+  .outlined-action-list-item__content { display: contents; }
+  .outlined-action-list-item__header { grid-column: 1; grid-row: 1; min-width: 0; margin: 0; }
+  .outlined-action-list-item__content > :not(.outlined-action-list-item__header) { grid-column: 1 / -1; min-width: 0; }
+  .outlined-action-list-item__content > :not(.outlined-action-list-item__header) { margin-top: 0; }
+  .outlined-action-list-item__actions { grid-column: 2; grid-row: 1; max-width: 128px; }
+}
 </style>

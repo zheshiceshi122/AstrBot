@@ -686,7 +686,7 @@ function autoResize() {
     typeof window !== "undefined" &&
     window.matchMedia("(max-width: 768px)").matches;
   const viewportHeight =
-    typeof window !== "undefined" ? window.innerHeight : 900;
+    typeof window !== "undefined" ? (window.visualViewport?.height ?? window.innerHeight) : 900;
   const minHeight = 48;
   const maxHeight = isMobileViewport
     ? Math.min(220, Math.round(viewportHeight * 0.42))
@@ -796,7 +796,7 @@ function handleCommandSelect(cmd: SuggestionCommand) {
   localPrompt.value = cmd.effective_command + " ";
   showCommandSuggestion.value = false;
   nextTick(() => {
-    inputField.value?.focus();
+    inputField.value?.focus({ preventScroll: true });
     autoResize();
   });
 }
@@ -941,7 +941,7 @@ function getCurrentSelection() {
 
 function focusInput() {
   if (!inputField.value) return;
-  inputField.value.focus();
+  inputField.value.focus({ preventScroll: true });
 }
 
 onMounted(() => {
@@ -967,25 +967,25 @@ defineExpose({
   padding: 0 16px;
   background-color: transparent;
   position: relative;
-  border-top: 1px solid var(--v-theme-border);
+  border-top: 1px solid var(--color-line);
   flex-shrink: 0;
 }
 
 .input-neutral-btn {
-  color: #000 !important;
+  color: var(--color-ink) !important;
 }
 
 .input-neutral-btn:hover {
-  background: #efefef;
+  background: var(--color-surface);
 }
 
 .input-neutral-btn--tonal {
-  background: #efefef;
-  color: #4f4f4f !important;
+  background: var(--color-surface);
+  color: var(--color-ink-soft) !important;
 }
 
 .input-neutral-btn--tonal:hover {
-  background: #e7e7e7;
+  background: var(--color-surface-variant, #e6ded0);
 }
 
 .input-action-btn,
@@ -1081,15 +1081,15 @@ defineExpose({
   display: flex;
   flex-direction: column;
   padding: 8px 14px !important;
-  border: 1px solid #d9d9d9;
-  border-radius: 20px !important;
-  background: #fff !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-panel) !important;
+  background: var(--color-surface-raised) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 .input-area.is-dark .input-container {
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  background: #242424 !important;
+  border: 1px solid var(--color-line) !important;
+  background: var(--color-surface-raised) !important;
   box-shadow: none !important;
 }
 
@@ -1121,7 +1121,7 @@ defineExpose({
   box-sizing: border-box;
   min-width: 0;
   min-height: 48px;
-  max-height: min(48vh, 420px);
+  max-height: min(calc(var(--astrbot-vv-height, 100dvh) * 0.48), 420px);
   margin: 0;
   padding: 4px 2px;
   border: 0;
@@ -1476,7 +1476,7 @@ defineExpose({
   .input-container {
     width: calc(100% - 20px) !important;
     max-width: 100% !important;
-    margin: 0 10px calc(8px + env(safe-area-inset-bottom)) !important;
+    margin: 0 10px 8px !important;
     padding: 8px 10px !important;
   }
 
@@ -1497,7 +1497,7 @@ defineExpose({
 
   .chat-textarea {
     font-size: 16px;
-    max-height: min(42vh, 220px);
+    max-height: min(calc(var(--astrbot-vv-height, 100dvh) * 0.42), 220px);
   }
 
   :deep(.provider-chip) {
@@ -1527,6 +1527,29 @@ defineExpose({
   .image-preview {
     width: 54px;
     flex-basis: 54px;
+  }
+}
+
+/* Phone composer controls: the visual circles stay compact, but the tap area
+   is the same 40px as the rest of the mobile shell. */
+@media (max-width: 600px) {
+  .input-action-btn,
+  .input-outline-control,
+  .input-icon-btn {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+
+  :deep(.provider-chip) {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    font-size: 14px !important;
+  }
+
+  .input-right-actions {
+    gap: 8px;
   }
 }
 </style>

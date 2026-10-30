@@ -3,7 +3,7 @@
     :model-value="modelValue"
     max-width="880"
     height="580"
-    max-height="calc(100dvh - 48px)"
+    max-height="calc(var(--astrbot-overlay-height, 100dvh) - 48px)"
     :aria-label="t('core.common.settings')"
     @update:model-value="emit('update:modelValue', $event)"
   >

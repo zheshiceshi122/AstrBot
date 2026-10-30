@@ -3,6 +3,7 @@ import { logApi, pluginApi } from "@/api/v1";
 import { useModuleI18n } from "@/i18n/composables";
 import { normalizeTextInput } from "@/utils/inputValue";
 import { EventSourcePolyfill } from "event-source-polyfill";
+import { ListFilter, Maximize2, Minimize2 } from '@lucide/vue';
 
 const { tm } = useModuleI18n("features/console");
 </script>
@@ -42,10 +43,12 @@ const { tm } = useModuleI18n("features/console");
         size="small"
         :variant="filtersOpen || hasActiveFilters ? 'tonal' : 'text'"
         :aria-expanded="filtersOpen"
+        :aria-label="tm('filters.button')"
+        :title="tm('filters.button')"
         @click="filtersOpen = !filtersOpen"
       >
-        <v-icon icon="mdi-filter-variant" size="17" />
-        <span>{{ tm("filters.button") }}</span>
+        <ListFilter :size="19" aria-hidden="true" />
+        <span class="console-tool-label">{{ tm("filters.button") }}</span>
         <span v-if="hasActiveFilters" class="filter-status-dot" />
       </v-btn>
       <v-text-field
@@ -66,12 +69,14 @@ const { tm } = useModuleI18n("features/console");
       <v-spacer></v-spacer>
       <slot name="header-actions"></slot>
       <v-btn
-        :icon="isFullscreen ? 'mdi-fullscreen-exit' : 'mdi-fullscreen'"
+        icon
         variant="text"
         density="compact"
         class="me-4 fullscreen-btn"
+        :aria-label="tm(isFullscreen ? 'exitFullscreen' : 'fullscreen')"
+        :title="tm(isFullscreen ? 'exitFullscreen' : 'fullscreen')"
         @click="toggleFullscreen"
-      ></v-btn>
+      ><component :is="isFullscreen ? Minimize2 : Maximize2" :size="19" aria-hidden="true" /></v-btn>
     </div>
 
     <div class="console-body">
@@ -1048,6 +1053,8 @@ export default {
   .console-displayer-wrapper--workspace .filter-controls {
     gap: 6px;
     padding: 0;
+      flex-wrap: wrap;
+      overflow-x: visible;
   }
 
   .console-displayer-wrapper--workspace .log-search-field {
@@ -1070,8 +1077,10 @@ export default {
   }
 
   :deep(.console-log-line--structured) {
-    grid-template-columns: 1fr;
+    grid-template-columns: max-content minmax(0, 1fr);
   }
+  :deep(.console-log-message) { grid-column: 1 / -1; }
+  :deep(.console-log-prefix) { overflow-wrap: anywhere; max-width: 70vw; }
   :deep(.console-log-prefix:empty),
   :deep(.console-log-level:empty) {
     display: none;
@@ -1090,5 +1099,13 @@ export default {
   to {
     opacity: 1;
   }
+}
+@media (max-width: 600px) {
+  .console-displayer-wrapper--workspace .filter-controls { flex-wrap: nowrap; gap: 4px; }
+  .console-displayer-wrapper--workspace .console-tool-label { display: none; }
+  .console-displayer-wrapper--workspace .filter-controls > .v-spacer { display: none; }
+  .console-displayer-wrapper--workspace .log-search-field { min-width: 0; flex: 1; }
+  .console-displayer-wrapper--workspace .filter-toggle-btn,
+  .console-displayer-wrapper--workspace .fullscreen-btn { flex: 0 0 40px; min-width: 40px; width: 40px; height: 40px; padding: 0; margin: 0 !important; }
 }
 </style>

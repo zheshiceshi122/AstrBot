@@ -37,7 +37,7 @@
           size="x-small"
           variant="flat"
           :color="
-            resolvedMessageType === 'GroupMessage' ? '#1976D2' : '#2E7D32'
+            resolvedMessageType === 'GroupMessage' ? 'primary' : 'success'
           "
         >
           {{

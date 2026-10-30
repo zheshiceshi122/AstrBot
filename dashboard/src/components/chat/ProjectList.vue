@@ -463,4 +463,43 @@ async function handleDeleteSession(projectId: string, session: ProjectSession) {
   color: var(--chat-muted);
   font-size: 13px;
 }
+
+/* Phone drawer: project rows and their actions use the same 40px touch scale,
+   and the actions stay visible because touch screens have no hover state. */
+@media (max-width: 959.98px) {
+  .sidebar-section-header {
+    min-height: 40px;
+  }
+
+  .section-action-btn {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+
+  .project-row,
+  .project-session-row {
+    min-height: 48px;
+  }
+
+  .project-session-row {
+    padding-right: 84px;
+  }
+
+  .project-session-actions {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .project-session-row .project-session-progress {
+    right: 84px;
+  }
+
+  .project-session-row:hover .project-session-progress,
+  .project-session-row:focus-within .project-session-progress {
+    opacity: 1;
+    visibility: visible;
+  }
+}
 </style>

@@ -26,64 +26,41 @@
           <span class="kb-list-emoji">{{ kb.emoji || '📚' }}</span>
         </template>
 
-        <template #title-extra>
-          <v-chip
-            v-if="kb.init_error"
-            color="error"
-            size="x-small"
-            variant="tonal"
-          >
-            {{ t('list.initError') }}
-          </v-chip>
-        </template>
-
         <div v-if="!kb.init_error" class="kb-description text-body-2 text-medium-emphasis">
           {{ kb.description || t('list.noDescription') }}
         </div>
 
         <div v-if="kb.init_error" class="kb-error-panel">
-            <div class="kb-error-title">
-              <v-icon size="16" color="error">mdi-close-circle</v-icon>
-              <span>{{ t('list.initError') }}</span>
-            </div>
-            <div class="kb-error-detail" :title="kb.init_error">{{ kb.init_error }}</div>
+          <div class="kb-error-title">
+            <v-icon size="16" color="error">mdi-close-circle</v-icon>
+            <span>{{ t('list.initError') }}</span>
+          </div>
+          <div class="kb-error-detail" :title="kb.init_error">{{ kb.init_error }}</div>
         </div>
 
-        <div class="kb-stats" v-if="!kb.init_error">
-            <div class="stat-item">
-              <v-icon size="small">mdi-file-document</v-icon>
-              <span>{{ kb.doc_count || 0 }} {{ t('list.documents') }}</span>
-            </div>
-            <div class="stat-item">
-              <v-icon size="small">mdi-text-box</v-icon>
-              <span>{{ kb.chunk_count || 0 }} {{ t('list.chunks') }}</span>
-            </div>
+        <div v-if="!kb.init_error" class="kb-stats">
+          <div class="stat-item">
+            <v-icon size="small">mdi-file-document</v-icon>
+            <span>{{ kb.doc_count || 0 }} {{ t('list.documents') }}</span>
+          </div>
+          <div class="stat-item">
+            <v-icon size="small">mdi-text-box</v-icon>
+            <span>{{ kb.chunk_count || 0 }} {{ t('list.chunks') }}</span>
+          </div>
         </div>
 
         <template #actions>
           <v-tooltip v-if="!kb.init_error" :text="t('card.edit')" location="top">
             <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-pencil-outline"
-                variant="text"
-                size="small"
-                class="list-action-icon-btn"
-                @click.stop="editKB(kb)"
-              />
+              <v-btn v-bind="props" icon="mdi-pencil-outline" variant="text" size="small"
+                class="list-action-icon-btn" :aria-label="t('card.edit')" @click.stop="editKB(kb)" />
             </template>
           </v-tooltip>
 
           <v-tooltip :text="t('card.delete')" location="top">
             <template #activator="{ props }">
-              <v-btn
-                v-bind="props"
-                icon="mdi-delete-outline"
-                variant="text"
-                size="small"
-                class="list-action-icon-btn"
-                @click.stop="confirmDelete(kb)"
-              />
+              <v-btn v-bind="props" icon="mdi-delete-outline" variant="text" size="small"
+                class="list-action-icon-btn" :aria-label="t('card.delete')" @click.stop="confirmDelete(kb)" />
             </template>
           </v-tooltip>
         </template>
@@ -93,54 +70,24 @@
         v-if="total > pageSize"
         v-model="page"
         :length="Math.ceil(total / pageSize)"
-        :total-visible="7"
-        class="mt-4"
+        :total-visible="5"
+        class="kb-pagination mt-4"
         @update:model-value="loadKnowledgeBases()"
       />
     </div>
 
-    <!-- 空状态 -->
+    <!-- 空状态：创建入口只保留这一处，顶栏的刷新/创建在有数据时才出现。 -->
     <div v-else class="empty-state">
-      <v-icon size="100" color="grey-lighten-2">mdi-book-open-variant</v-icon>
+      <v-icon size="72" color="grey-lighten-2">mdi-book-open-variant</v-icon>
       <h2 class="mt-4">{{ t('list.empty') }}</h2>
-      <v-btn class="mt-6" prepend-icon="mdi-plus" color="primary" variant="elevated" size="large"
+      <v-btn class="mt-6" prepend-icon="mdi-plus" color="primary" variant="tonal"
         @click="showCreateDialog = true">
         {{ t('list.create') }}
       </v-btn>
     </div>
 
-    <div class="kb-fab-stack">
-      <v-tooltip :text="t('list.refresh')" location="left">
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            color="darkprimary"
-            icon="mdi-refresh"
-            size="x-large"
-            variant="elevated"
-            class="kb-fab"
-            :loading="loading"
-            @click="loadKnowledgeBases()"
-          />
-        </template>
-      </v-tooltip>
-      <v-tooltip :text="t('list.create')" location="left">
-        <template #activator="{ props }">
-          <v-btn
-            v-bind="props"
-            color="darkprimary"
-            icon="mdi-plus"
-            size="x-large"
-            variant="elevated"
-            class="kb-fab"
-            @click="showCreateDialog = true"
-          />
-        </template>
-      </v-tooltip>
-    </div>
-
     <!-- 创建/编辑对话框 -->
-    <v-dialog v-model="showCreateDialog" max-width="600px" persistent>
+    <v-dialog class="dashboard-form-dialog" v-model="showCreateDialog" max-width="600px" persistent>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <span>{{ editingKB ? t('edit.title') : t('create.title') }}</span>
@@ -211,7 +158,7 @@
     </v-dialog>
 
     <!-- 删除确认对话框 -->
-    <v-dialog v-model="showDeleteDialog" max-width="450px" persistent>
+    <v-dialog class="dashboard-form-dialog" v-model="showDeleteDialog" max-width="450px" persistent>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ t('delete.title') }}</v-card-title>
         <v-divider />
@@ -239,15 +186,11 @@
       {{ snackbar.text }}
     </v-snackbar>
 
-    <div class="position-absolute" style="bottom: 0px; right: 16px;">
-      <small @click="router.push('/alkaid/knowledge-base')"><a style="text-decoration: underline; cursor: pointer;">{{ t('list.switchLegacy') }}</a></small>
-    </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { knowledgeApi, providerApi } from '@/api/v1'
 import { useModuleI18n } from '@/i18n/composables'
@@ -468,6 +411,9 @@ const showSnackbar = (text: string, color: string = 'success') => {
   snackbar.value.show = true
 }
 
+const hasItems = computed(() => kbList.value.length > 0)
+defineExpose({ loading, hasItems, refresh: loadKnowledgeBases, openCreate: () => { showCreateDialog.value = true } })
+
 onMounted(() => {
   loadKnowledgeBases(true)  // 首次加载时刷新统计信息
   loadProviders()
@@ -562,27 +508,6 @@ onMounted(() => {
   color: rgb(var(--v-theme-on-surface));
 }
 
-.kb-fab-stack {
-  align-items: center;
-  bottom: 52px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: fixed;
-  right: 52px;
-  z-index: 10000;
-}
-
-.kb-fab {
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.kb-fab:hover {
-  box-shadow: 0 12px 20px rgba(var(--v-theme-primary), 0.4);
-  transform: translateY(-4px) scale(1.05);
-}
 
 /* 空状态 */
 .empty-state {
@@ -603,4 +528,7 @@ onMounted(() => {
   min-height: 400px;
 }
 
+@media (max-width: 600px) {
+  .empty-state, .loading-container { min-height: 200px; } .kb-list { gap: 8px; } .kb-description { font-size: 13px !important; } .kb-stats { gap: 4px 10px; margin-top: 5px; flex-wrap: wrap; font-size: 12px; }
+}
 </style>

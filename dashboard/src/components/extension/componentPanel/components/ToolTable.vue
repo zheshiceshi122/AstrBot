@@ -93,7 +93,7 @@ const getPermissionLabel = (permission?: string): string => {
 
 <template>
   <v-card class="rounded-lg overflow-hidden elevation-1">
-    <v-data-table
+    <v-data-table :mobile="$vuetify.display.xs" :hide-default-header="$vuetify.display.xs && !items.length" density="compact"
       :headers="toolHeaders"
       :items="items"
       item-value="name"
@@ -215,7 +215,7 @@ const getPermissionLabel = (permission?: string): string => {
       </template>
 
       <template #no-data>
-        <div class="text-center pa-8">
+        <div class="table-empty text-center pa-8">
           <v-icon size="64" color="info" class="mb-4">mdi-function-variant</v-icon>
           <div class="text-h5 mb-2">{{ tmTool('functionTools.empty') }}</div>
         </div>
@@ -287,5 +287,16 @@ const getPermissionLabel = (permission?: string): string => {
 .tool-config-tooltip :deep(.text-medium-emphasis),
 .tool-config-tooltip :deep(.font-weight-medium) {
   color: inherit !important;
+}
+@media (max-width: 600px) {
+  :deep(.v-data-table__td) { min-width: 0 !important; width: auto !important; padding: 6px 10px; }
+  :deep(.v-data-table__td-value) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  :deep(.text-body-2) { max-width: 100% !important; white-space: normal !important; overflow-wrap: anywhere; }
+}
+@media (max-width: 600px) {
+  .table-empty { padding: 16px 10px !important; }
+  .table-empty .v-icon { width: 28px !important; height: 28px !important; font-size: 28px !important; margin-bottom: 6px !important; }
+  .table-empty .text-h5 { font-size: 14px !important; margin-bottom: 4px !important; }
+  .table-empty .text-body-1 { font-size: 12px !important; margin-bottom: 0 !important; }
 }
 </style>

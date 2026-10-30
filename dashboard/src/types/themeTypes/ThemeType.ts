@@ -24,9 +24,13 @@ export type ThemeTypes = {
     inputBorder?: string;
     containerBg?: string;
     surface?: string;
+    'surface-variant'?: string;
     background?: string;
-    overlay?: string;
+    'on-surface'?: string;
     'on-surface-variant'?: string;
+    'on-background'?: string;
+    'on-primary'?: string;
+    overlay?: string;
     facebook?: string;
     twitter?: string;
     linkedin?: string;

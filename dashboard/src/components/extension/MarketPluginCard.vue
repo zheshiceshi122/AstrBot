@@ -176,6 +176,7 @@ const handleOpen = () => {
     </v-card-text>
 
     <v-card-actions
+      class="plugin-card-actions"
       style="gap: 6px; padding: 8px 12px; padding-top: 0"
       @click.stop
     >
@@ -380,5 +381,15 @@ const handleOpen = () => {
 .market-action-btn {
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.plugin-card-actions {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .market-action-btn {
+    font-size: 12px;
+  }
 }
 </style>

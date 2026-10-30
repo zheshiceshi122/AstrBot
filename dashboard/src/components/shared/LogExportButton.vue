@@ -114,6 +114,7 @@ async function exportLogs() {
     </template>
   </v-tooltip>
   <v-dialog
+    class="dashboard-form-dialog"
     v-model="dialog"
     :attach="attachTarget"
     :persistent="exporting"

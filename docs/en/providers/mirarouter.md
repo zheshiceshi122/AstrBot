@@ -19,7 +19,7 @@ Open the AstrBot dashboard and go to **Providers → Chat Completion → Add →
 
 AstrBot automatically adds the `X-APP-CODE: astrbot` identifier to MiraRouter requests.
 
-Enter the provider name and `API Key`, check the `API Base URL`, then click **Save and Fetch Models**. Click `+` beside the desired model and make sure it is enabled. Alternatively, click **Save Configuration**, then **Custom Model** and enter the exact model ID. Use **Test Model** beside the configured model to check availability.
+Enter the name, API key, and Base URL, then enter a **Model** ID directly or use **Fetch Models / Save and Fetch Models** near the field to fetch a list. Choose a **Chat configuration profile** and click **Save and use** to save the connection, add the model, and apply it. Leave **Save model without switching** selected to only save the connection and model. Connectivity tests and model settings remain in the configured-model list below. See [Connecting Model Services](./start.md) for details.
 
 ## Set as Default
 

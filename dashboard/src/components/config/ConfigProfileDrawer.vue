@@ -28,10 +28,10 @@ function close() {
 </script>
 
 <template>
-  <v-overlay
+  <v-dialog
     v-model="open"
     class="config-profile-drawer-overlay"
-    location="right"
+    scrollable
     transition="slide-x-reverse-transition"
     :scrim="true"
     @click:outside="close"
@@ -50,7 +50,7 @@ function close() {
         <ConfigPage v-if="open && configId" :initial-config-id="configId" />
       </div>
     </v-card>
-  </v-overlay>
+  </v-dialog>
 </template>
 
 <style>
@@ -59,12 +59,20 @@ function close() {
   justify-content: flex-end;
 }
 
+.config-profile-drawer-overlay > .v-overlay__content {
+  width: clamp(320px, 60vw, 820px);
+  height: calc(var(--astrbot-overlay-height, 100dvh) - 32px);
+  max-height: calc(var(--astrbot-overlay-height, 100dvh) - 32px);
+  margin: 16px;
+}
+
 .config-profile-drawer-card {
   display: flex;
-  width: clamp(320px, 60vw, 820px);
-  height: calc(100vh - 32px);
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
   flex-direction: column;
-  margin: 16px;
 }
 
 .config-profile-drawer-header {
@@ -82,7 +90,19 @@ function close() {
 
 .config-profile-drawer-content {
   flex: 1;
-  overflow-y: auto;
+  min-height: 0;
+  overflow: hidden;
   padding: 16px 16px 24px;
+}
+
+@media (max-width: 600px) {
+  .config-profile-drawer-overlay > .v-overlay__content {
+    width: calc(100% - 16px);
+    height: calc(var(--astrbot-overlay-height, 100dvh) - 16px);
+  }
+
+  .config-profile-drawer-header { padding-left: 12px; }
+  .config-profile-drawer-title { font-size: 16px; }
+  .config-profile-drawer-content { padding: 8px; }
 }
 </style>

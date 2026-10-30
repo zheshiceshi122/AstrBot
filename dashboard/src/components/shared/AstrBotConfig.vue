@@ -267,7 +267,10 @@ function hasVisibleItemsAfter(items, currentIndex) {
 
         <!-- Regular Property -->
         <template v-else>
-          <v-row v-if="!metadata[metadataKey].items[key]?.invisible && shouldShowItem(metadata[metadataKey].items[key], key)" class="config-row">
+          <v-row v-if="!metadata[metadataKey].items[key]?.invisible && shouldShowItem(metadata[metadataKey].items[key], key)" class="config-row" :class="{
+            'config-row--toggle': metadata[metadataKey].items[key]?.type === 'bool' && !metadata[metadataKey].items[key]?._special && !metadata[metadataKey].items[key]?.options && !metadata[metadataKey].items[key]?.full_width,
+            'config-row--number config-row--inline': ['int', 'float'].includes(metadata[metadataKey].items[key]?.type) && !metadata[metadataKey].items[key]?.slider && !metadata[metadataKey].items[key]?._special && !metadata[metadataKey].items[key]?.options && !metadata[metadataKey].items[key]?.editor_mode && !metadata[metadataKey].items[key]?.full_width
+          }">
             <v-col cols="12" sm="6" class="property-info">
               <v-list-item density="compact">
                 <v-list-item-title class="property-name">
@@ -388,11 +391,11 @@ function hasVisibleItemsAfter(items, currentIndex) {
           <v-btn variant="text" @click="saveEditedContent">{{ t('core.common.save') }}</v-btn>
         </v-toolbar-items>
       </v-toolbar>
-      <v-card-text class="pa-0">
+      <v-card-text class="pa-0 config-editor-body">
         <VueMonacoEditor
           :theme="currentEditingTheme"
           :language="currentEditingLanguage"
-          style="height: calc(100vh - 64px);"
+          style="height: 100%;"
           v-model:value="currentEditingKeyIterable[currentEditingKey]"
         >
         </VueMonacoEditor>
@@ -551,6 +554,41 @@ function hasVisibleItemsAfter(items, currentIndex) {
 
   .property-info :deep(.v-list-item) {
     padding-inline: 0;
+  }
+
+  .property-name,
+  .property-hint {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .property-hint {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
+
+  .property-hint__content--linked {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .config-row--toggle,
+  .config-row--number {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .config-row--toggle > .v-col,
+  .config-row--number > .v-col {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .config-row--number > .config-input {
+    width: 80px;
   }
 
   .type-indicator,

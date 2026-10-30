@@ -293,6 +293,9 @@ function openManager() {
 @media (max-width: 768px) {
   .config-profile-trigger {
     max-width: calc(100vw - 40px);
+    height: 40px;
+    padding-inline: 8px;
+    border-radius: 10px;
   }
 
   .config-profile-trigger__title {

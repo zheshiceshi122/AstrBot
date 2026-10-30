@@ -272,7 +272,7 @@ function getSpecialSubtype(value) {
       <v-list-item-title class="config-title">
         {{ translateIfKey(metadata[metadataKey]?.description) }}
       </v-list-item-title>
-      <v-list-item-subtitle class="config-hint">
+      <v-list-item-subtitle v-if="metadata[metadataKey]?.hint" class="config-hint">
         <span v-if="metadata[metadataKey]?.obvious_hint && metadata[metadataKey]?.hint" class="important-hint">‼️</span>
         <span v-html="renderHint(metadata[metadataKey]?.hint)"></span>
       </v-list-item-subtitle>
@@ -285,7 +285,12 @@ function getSpecialSubtype(value) {
         :key="itemKey"
         class="config-item"
       >
-        <v-row v-if="!itemMeta?.invisible" class="config-row">
+        <v-row v-if="!itemMeta?.invisible" class="config-row"
+          :class="{
+            'config-row--toggle': itemMeta?.type === 'bool' && !itemMeta?._special && !itemMeta?.options && !itemMeta?.full_width,
+            'config-row--number': !itemMeta?.slider && !itemMeta?.full_width && !itemMeta?._special && !itemMeta?.options && !itemMeta?.editor_mode && ['int', 'float'].includes(itemMeta?.type),
+            'config-row--inline': !itemMeta?.full_width && !itemMeta?.editor_mode && !itemMeta?.slider && ((!itemMeta?._special && ['string', 'int', 'float'].includes(itemMeta?.type)) || ['select_provider', 'select_provider_stt', 'select_provider_tts', 'select_providers', 'provider_pool', 'select_persona', 'persona_pool', 'select_knowledgebase', 'select_plugin_set'].includes(itemMeta?._special))
+          }">
           <v-col cols="12" :sm="itemMeta?.full_width ? 12 : 6" class="property-info">
             <v-list-item density="compact">
               <v-list-item-title class="property-name">
@@ -293,7 +298,7 @@ function getSpecialSubtype(value) {
                 <span v-if="itemMeta?.show_key" class="property-key">({{ itemKey }})</span>
               </v-list-item-title>
 
-              <v-list-item-subtitle class="property-hint">
+              <v-list-item-subtitle v-if="getItemHint(itemKey, itemMeta)" class="property-hint">
                 <span v-if="itemMeta?.obvious_hint && itemMeta?.hint" class="important-hint">‼️</span>
                 <span v-html="renderHint(getItemHint(itemKey, itemMeta))"></span>
               </v-list-item-subtitle>
@@ -372,7 +377,12 @@ function getSpecialSubtype(value) {
               :key="itemKey"
               class="config-item"
             >
-              <v-row v-if="!itemMeta?.invisible" class="config-row">
+              <v-row v-if="!itemMeta?.invisible" class="config-row"
+          :class="{
+            'config-row--toggle': itemMeta?.type === 'bool' && !itemMeta?._special && !itemMeta?.options && !itemMeta?.full_width,
+            'config-row--number': !itemMeta?.slider && !itemMeta?.full_width && !itemMeta?._special && !itemMeta?.options && !itemMeta?.editor_mode && ['int', 'float'].includes(itemMeta?.type),
+            'config-row--inline': !itemMeta?.full_width && !itemMeta?.editor_mode && !itemMeta?.slider && ((!itemMeta?._special && ['string', 'int', 'float'].includes(itemMeta?.type)) || ['select_provider', 'select_provider_stt', 'select_provider_tts', 'select_providers', 'provider_pool', 'select_persona', 'persona_pool', 'select_knowledgebase', 'select_plugin_set'].includes(itemMeta?._special))
+          }">
                 <v-col cols="12" sm="6" class="property-info">
                   <v-list-item density="compact">
                     <v-list-item-title class="property-name">
@@ -380,7 +390,7 @@ function getSpecialSubtype(value) {
                       <span v-if="itemMeta?.show_key" class="property-key">({{ itemKey }})</span>
                     </v-list-item-title>
 
-                    <v-list-item-subtitle class="property-hint">
+                    <v-list-item-subtitle v-if="getItemHint(itemKey, itemMeta)" class="property-hint">
                       <span v-if="itemMeta?.obvious_hint && itemMeta?.hint" class="important-hint">‼️</span>
                       <span v-html="renderHint(getItemHint(itemKey, itemMeta))"></span>
                     </v-list-item-subtitle>
@@ -459,9 +469,9 @@ function getSpecialSubtype(value) {
           <v-btn variant="text" @click="saveEditedContent">{{ t('core.common.save') }}</v-btn>
         </v-toolbar-items>
       </v-toolbar>
-      <v-card-text class="pa-0">
+      <v-card-text class="pa-0 config-editor-body">
         <VueMonacoEditor :theme="currentEditingTheme" :language="currentEditingLanguage"
-          style="height: calc(100vh - 64px);" v-model:value="currentEditingKeyIterable[currentEditingKey]">
+          style="height: 100%;" v-model:value="currentEditingKeyIterable[currentEditingKey]">
         </VueMonacoEditor>
       </v-card-text>
     </v-card>

@@ -25,7 +25,7 @@
       "note": "累计消息量"
     },
     "todayModelCalls": {
-      "label": "今日模型调用",
+      "label": "今日 Token 用量",
       "note": "Tokens"
     },
     "cpu": {

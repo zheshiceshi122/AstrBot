@@ -73,9 +73,9 @@ const dialog = computed({
 
   :deep(.v-overlay__content) {
     width: calc(100dvw - 24px);
-    height: calc(100dvh - 24px);
+    height: calc(var(--astrbot-overlay-height, 100dvh) - 24px);
     max-width: calc(100dvw - 24px);
-    max-height: calc(100dvh - 24px);
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 24px);
   }
 }
 
@@ -90,9 +90,9 @@ const dialog = computed({
 
   :deep(.v-overlay__content) {
     width: 100dvw;
-    height: 100dvh;
+    height: var(--astrbot-overlay-height, 100dvh);
     max-width: 100dvw;
-    max-height: 100dvh;
+    max-height: var(--astrbot-overlay-height, 100dvh);
   }
 }
 </style>

@@ -1,11 +1,33 @@
 <template>
     <div class="settings-page">
-        <header class="settings-page__header">
-            <h1 class="settings-page__title">{{ tm('page.title') }}</h1>
-        </header>
+        <PageToolbar class="settings-page__header">
+            <v-menu v-if="$vuetify.display.smAndDown && activeSettingsSection !== 'overview'">
+                <template #activator="{ props }">
+                    <button v-bind="props" type="button" class="settings-page__section-menu">
+                        <span>{{ currentSettingsLabel }}</span>
+                        <v-icon size="18" aria-hidden="true">mdi-chevron-down</v-icon>
+                    </button>
+                </template>
+                <v-list density="compact" class="settings-page__section-list">
+                    <v-list-item
+                        v-for="item in settingsNavItems"
+                        :key="item.id"
+                        :active="activeSettingsSection === item.id"
+                        style="min-height: 40px; padding-block: 0"
+                        @click="goToSettingsSection(item)"
+                    >
+                        <v-list-item-title>{{ item.label }}</v-list-item-title>
+                        <template #append>
+                            <v-icon v-if="activeSettingsSection === item.id" size="18">mdi-check</v-icon>
+                        </template>
+                    </v-list-item>
+                </v-list>
+            </v-menu>
+            <h1 v-else class="settings-page__title">{{ currentSettingsLabel }}</h1>
+        </PageToolbar>
 
-        <div class="settings-layout">
-            <nav class="settings-nav" :aria-label="tm('page.title')">
+        <div class="settings-layout" :class="{ 'settings-layout--overview': activeSettingsSection === 'overview' }">
+            <nav v-if="activeSettingsSection !== 'overview'" class="settings-nav" :aria-label="tm('page.title')">
                 <button
                     v-for="item in settingsNavItems"
                     :key="item.id"
@@ -16,7 +38,7 @@
                         'settings-nav__item--divider': item.dividerBefore
                     }"
                     :aria-pressed="activeSettingsSection === item.id"
-                    @click="activeSettingsSection = item.id"
+                    @click="$router.push({ path: '/settings', hash: item.id === 'general' ? '#system-config' : `#settings-${item.id}` })"
                 >
                     <span class="settings-nav__icon" :class="item.icon" aria-hidden="true"></span>
                     <span>{{ item.label }}</span>
@@ -24,6 +46,28 @@
             </nav>
 
             <main class="settings-main">
+                <section v-if="activeSettingsSection === 'overview'">
+                    <div class="workspace-menu">
+                        <RouterLink to="/providers" class="workspace-menu__item">
+                            <span><strong>{{ t('core.navigation.modelsAndApi') }}</strong><small>{{ t('core.navigation.hubHints.providers') }}</small></span>
+                            <v-icon size="18">mdi-chevron-right</v-icon>
+                        </RouterLink>
+                        <RouterLink to="/config" class="workspace-menu__item">
+                            <span><strong>{{ t('core.navigation.config') }}</strong><small>{{ t('core.navigation.hubHints.config') }}</small></span>
+                            <v-icon size="18">mdi-chevron-right</v-icon>
+                        </RouterLink>
+                    </div>
+                    <ComputerAccessSetting />
+                    <h2 class="workspace-menu__group">{{ t('core.navigation.groups.system') }}</h2>
+                    <div class="workspace-menu">
+                        <RouterLink v-for="item in settingsNavItems" :key="item.id"
+                            :to="{ path: '/settings', hash: item.id === 'general' ? '#system-config' : `#settings-${item.id}` }" class="workspace-menu__item">
+                            <span><strong>{{ item.label }}</strong><small>{{ t(`core.navigation.hubHints.${item.id}`) }}</small></span>
+                            <v-icon size="18">mdi-chevron-right</v-icon>
+                        </RouterLink>
+                        <RouterLink to="/about" class="workspace-menu__item"><span><strong>{{ t('core.navigation.about') }}</strong><small>{{ t('core.navigation.hubHints.about') }}</small></span><v-icon size="18">mdi-chevron-right</v-icon></RouterLink>
+                    </div>
+                </section>
                 <v-slide-y-reverse-transition>
                     <div v-if="systemConfigRestartRequired" class="system-config-restart-bar" role="status">
                         <div class="system-config-restart-bar__inner">
@@ -52,9 +96,6 @@
                 />
 
                 <section id="system-config" class="settings-section" v-show="activeSettingsSection === 'general'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.general.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <template v-if="!systemConfigLoading">
                             <div
@@ -93,9 +134,6 @@
                 </section>
 
                 <section id="settings-appearance" class="settings-section" v-show="activeSettingsSection === 'appearance'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.appearance.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <div class="settings-list-card">
                             <div class="settings-item settings-item--color">
@@ -134,9 +172,6 @@
                 </section>
 
                 <section id="settings-network" class="settings-section" v-show="activeSettingsSection === 'network'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.network.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <template v-if="!systemConfigLoading">
                             <div
@@ -181,9 +216,6 @@
                 </section>
 
                 <section id="settings-security" class="settings-section" v-show="activeSettingsSection === 'security'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.security.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <template v-if="!systemConfigLoading">
                             <div
@@ -204,9 +236,6 @@
                 </section>
 
                 <section id="settings-maintenance" class="settings-section" v-show="activeSettingsSection === 'maintenance'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.maintenance.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <div class="settings-list-card">
                             <div class="settings-item">
@@ -249,9 +278,6 @@
                 </section>
 
                 <section id="settings-openapi" class="settings-section" v-show="activeSettingsSection === 'openapi'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.openapi.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <div class="settings-list-card">
                             <div class="settings-item settings-item--stack">
@@ -455,9 +481,6 @@
                 </section>
 
                 <section id="settings-resources" class="settings-section" v-show="activeSettingsSection === 'resources'">
-                    <div class="settings-section__heading">
-                        <div class="settings-section__title">{{ tm('sections.resources.title') }}</div>
-                    </div>
                     <div class="settings-section__content">
                         <div class="settings-list-card">
                             <div
@@ -497,7 +520,11 @@
 </template>
 
 <script setup>
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import ComputerAccessSetting from '@/components/shared/ComputerAccessSetting.vue';
+import '@/styles/workspace-menu.css';
 import { apiKeyApi, systemConfigApi } from '@/api/v1';
 import AstrBotConfigV4 from '@/components/shared/AstrBotConfigV4.vue';
 import WaitingForRestart from '@/components/shared/WaitingForRestart.vue';
@@ -589,7 +616,9 @@ const serverUtcOffsetMinutes = ref(null);
 const serverClockAnchorMs = ref(null);
 const serverClockTickMs = ref(null);
 const serverClockTimer = ref(null);
-const activeSettingsSection = ref('general');
+const route = useRoute();
+const router = useRouter();
+const activeSettingsSection = ref('overview');
 const changelogDialog = ref(false);
 
 const apiKeyExpiryOptions = computed(() => [
@@ -649,6 +678,23 @@ const settingsNavItems = computed(() => [
     { id: 'openapi', label: tm('sections.openapi.title'), icon: 'mdi mdi-api' },
     { id: 'resources', label: tm('sections.resources.title'), icon: 'mdi mdi-information-outline', dividerBefore: true }
 ]);
+
+const currentSettingsLabel = computed(() => {
+    if (activeSettingsSection.value === 'overview') return t('core.navigation.mobileSettings');
+    return settingsNavItems.value.find(item => item.id === activeSettingsSection.value)?.label ?? '';
+});
+
+function goToSettingsSection(item) {
+    router.push({
+        path: '/settings',
+        hash: item.id === 'general' ? '#system-config' : `#settings-${item.id}`,
+    });
+}
+
+watch(() => route.hash, (hash) => {
+    const section = hash === '#system-config' ? 'general' : hash.replace('#settings-', '');
+    activeSettingsSection.value = settingsNavItems.value.some(item => item.id === section) ? section : 'overview';
+}, { immediate: true });
 
 const openExternalLink = (url) => {
     if (typeof window === 'undefined') return;
@@ -1131,20 +1177,6 @@ onMounted(async () => {
     serverClockTimer.value = window.setInterval(() => {
         serverClockTickMs.value = performance.now();
     }, 1000);
-    const hash = window.location.hash;
-    if (hash.includes('settings-appearance')) {
-        activeSettingsSection.value = 'appearance';
-    } else if (hash.includes('settings-network')) {
-        activeSettingsSection.value = 'network';
-    } else if (hash.includes('settings-security')) {
-        activeSettingsSection.value = 'security';
-    } else if (hash.includes('settings-maintenance')) {
-        activeSettingsSection.value = 'maintenance';
-    } else if (hash.includes('settings-openapi')) {
-        activeSettingsSection.value = 'openapi';
-    } else if (hash.includes('settings-resources')) {
-        activeSettingsSection.value = 'resources';
-    }
 });
 
 onUnmounted(() => {
@@ -1168,11 +1200,11 @@ onUnmounted(() => {
     width: min(100%, 940px);
     height: 100%;
     margin: 0 auto;
-    padding: 36px 18px 8px;
+    padding: 16px 12px 8px;
 }
 
 .settings-page__header {
-    margin-bottom: 28px;
+    margin-bottom: 16px;
 }
 
 .settings-page__title {
@@ -1184,6 +1216,41 @@ onUnmounted(() => {
     line-height: 1.25;
 }
 
+/* Mobile section switcher: the full section list is one tap away instead of
+   requiring a trip back to the settings index for every section. */
+.settings-page__section-menu {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: rgb(var(--v-theme-on-surface));
+    cursor: pointer;
+    font: inherit;
+    font-size: 18px;
+    font-weight: 720;
+}
+
+.settings-page__section-menu:hover {
+    background: rgba(var(--v-theme-on-surface), 0.05);
+}
+
+.settings-page__section-menu span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-page__section-list :deep(.v-list-item) {
+    min-height: 44px;
+}
+
 .settings-layout {
     display: grid;
     grid-template-columns: 126px minmax(0, 1fr);
@@ -1192,6 +1259,10 @@ onUnmounted(() => {
     align-items: stretch;
     flex: 1;
     min-height: 0;
+}
+.settings-layout.settings-layout--overview {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
 }
 
 .settings-main {
@@ -1252,9 +1323,9 @@ onUnmounted(() => {
 }
 
 .settings-nav__item--active {
-    background: rgba(var(--v-theme-on-surface), 0.07);
-    color: rgb(var(--v-theme-on-surface));
-    font-weight: 760;
+    background: var(--color-accent-soft);
+    color: rgb(var(--v-theme-primary));
+    font-weight: 720;
 }
 
 .settings-nav__item--active::before {
@@ -1264,12 +1335,12 @@ onUnmounted(() => {
     left: 0;
     width: 2px;
     border-radius: 999px;
-    background: rgba(var(--v-theme-on-surface), 0.52);
+    background: rgb(var(--v-theme-primary));
     content: "";
 }
 
 .settings-nav__item--active .settings-nav__icon {
-    color: rgb(var(--v-theme-on-surface));
+    color: rgb(var(--v-theme-primary));
 }
 
 .settings-nav__icon {
@@ -1288,17 +1359,7 @@ onUnmounted(() => {
     margin-bottom: 0;
 }
 
-.settings-section__heading {
-    margin-bottom: 22px;
-}
 
-.settings-section__title {
-    color: rgb(var(--v-theme-on-surface));
-    font-size: 1.34rem;
-    font-weight: 780;
-    letter-spacing: 0;
-    line-height: 1.25;
-}
 
 .settings-section__content {
     min-width: 0;
@@ -1655,14 +1716,10 @@ onUnmounted(() => {
     bottom: 24px;
     z-index: 30;
     width: min(420px, calc(100vw - 48px));
-    border: 0;
-    border-radius: 12px;
-    background:
-        linear-gradient(rgba(var(--v-theme-on-surface), 0.055), rgba(var(--v-theme-on-surface), 0.055)),
-        rgba(var(--v-theme-surface), 0.74);
-    box-shadow: none;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-panel);
+    background: var(--color-surface-raised);
+    box-shadow: var(--glass-shadow);
 }
 
 .system-config-restart-bar__inner {
@@ -1704,11 +1761,11 @@ onUnmounted(() => {
 
 @media (max-width: 720px) {
     .settings-page {
-        padding: 32px 14px 8px;
+        padding: 12px 6px 8px;
     }
 
     .settings-page__header {
-        margin-bottom: 22px;
+        margin-bottom: 12px;
     }
 
     .settings-page__title {
@@ -1717,16 +1774,12 @@ onUnmounted(() => {
 
     .settings-layout {
         grid-template-columns: 1fr;
-        grid-template-rows: auto minmax(0, 1fr);
-        gap: 22px;
+        grid-template-rows: minmax(0, 1fr);
+        gap: 0;
     }
 
     .settings-nav {
-        position: static;
-        flex-flow: row wrap;
-        gap: 6px;
-        height: auto;
-        overflow-y: hidden;
+        display: none;
     }
 
     .settings-nav__item {
@@ -1778,6 +1831,24 @@ onUnmounted(() => {
         font-size: 0.8rem;
     }
 }
+@media (max-width: 600px) {
+    .settings-page { padding-top: 8px; }
+    .settings-page__header { margin-bottom: 8px; }
+    .settings-page__title { font-size: 18px; }
+    .settings-item { padding: 8px 10px; gap: 8px; }
+    .settings-item:has(.v-switch) { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+    .settings-item__control { min-width: 0; }
+    .settings-item__title { font-size: 13px; }
+    .settings-item__subtitle { font-size: 12px; line-height: 1.4; margin-top: 2px; }
+    .settings-list-card:not(:last-child) { margin-bottom: 12px; }
+}
+@media (max-width: 600px) {
+  .settings-item--color .settings-item__control { display: block; }
+  .color-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; gap: 8px; }
+  .color-controls :deep(.v-input) { width: 100%; min-width: 0; }
+  .color-controls > .v-btn { grid-column: 1 / -1; justify-self: end; }
+}
+
 </style>
 
 <style scoped src="@/styles/config-form.css"></style>

@@ -145,6 +145,27 @@
       "proxy": "プロキシアドレス"
     }
   },
+  "connection": {
+    "help": "入力の説明",
+    "title": "接続とモデル",
+    "model": "モデル",
+    "modelPlaceholder": "モデル ID を入力、または取得した一覧から選択",
+    "modelHint": "一覧を取得せずにモデル ID を直接入力できます。",
+    "applyTo": "チャット設定プロファイル",
+    "saveOnly": "モデルのみ保存し、切り替えない",
+    "profileHint": "選択したプロファイルのみ変更します。セッション固有のモデル指定は維持されます。",
+    "profilesError": "プロファイルを読み込めません。API とモデルは保存できます。",
+    "reloadProfiles": "プロファイルを再読み込み",
+    "unsaved": "未保存の変更",
+    "saveAndUse": "保存して使用",
+    "saveModel": "API とモデルを保存",
+    "saved": "モデル {model} を保存しました。上でプロファイルを選択するとチャットに適用できます。",
+    "applied": "「{name}」のチャットに {model} を適用しました。",
+    "modelSaveError": "モデルを保存できませんでした。エラーを確認してから再度保存してください。",
+    "profileSaveError": "プロファイルに適用できませんでした。",
+    "savedButNotApplied": "モデル {model} は保存済みですが未適用です：{error}",
+    "thirdPartyRunner": "このプロファイルは外部 Agent を使用しています。実行器は変更していません。AstrBot 内蔵 AI のプロファイルを選択してください。"
+  },
   "models": {
     "title": "モデル",
     "available": "利用可能なモデル",

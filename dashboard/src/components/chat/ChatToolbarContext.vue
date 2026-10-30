@@ -57,4 +57,32 @@ const title = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* On a phone the two stacked lines are too small to tap. The model selector
+   takes the whole 40px toolbar band as its hit area and the conversation title
+   is left to the chat list, where it already has room. */
+@media (max-width: 600px) {
+  .chat-toolbar-context {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .chat-toolbar-context :deep(.provider-select-menu),
+  .chat-toolbar-context :deep(.provider-trigger--header) {
+    height: 40px;
+  }
+
+  .chat-toolbar-context :deep(.provider-trigger--header) {
+    padding: 0 10px;
+    border-radius: 10px;
+  }
+
+  .chat-toolbar-context :deep(.provider-trigger--header .provider-trigger-title) {
+    line-height: 1;
+  }
+
+  .chat-toolbar-context-title {
+    display: none;
+  }
+}
 </style>

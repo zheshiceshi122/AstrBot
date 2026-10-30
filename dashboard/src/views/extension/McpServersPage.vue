@@ -8,15 +8,10 @@ const { tm } = useModuleI18n("features/extension");
 
 <template>
   <div class="plugin-section-page">
-    <div class="mb-4 pt-4 pb-4">
-      <div class="d-flex flex-column" style="gap: 6px">
-        <h2 class="text-h2 mb-0">{{ tm("tabs.installedMcpServers") }}</h2>
-        <div class="text-body-2 text-medium-emphasis">
-          {{ t("features.tooluse.mcpServers.description") }}
-        </div>
-      </div>
-    </div>
-    <McpServersSection />
+    <McpServersSection>
+      <template #heading><h2>{{ tm("tabs.installedMcpServers") }}</h2></template>
+      <template #description>{{ t("features.tooluse.mcpServers.description") }}</template>
+    </McpServersSection>
   </div>
 </template>
 

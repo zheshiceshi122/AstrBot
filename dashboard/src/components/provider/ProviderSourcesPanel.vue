@@ -6,7 +6,7 @@
       </div>
 
       <div class="provider-sources-controls">
-        <div class="provider-sources-mobile-select">
+        <div v-if="displayedProviderSources.length" class="provider-sources-mobile-select">
           <v-select
             :model-value="selectedSourceValue"
             :items="sourceOptions"
@@ -17,6 +17,7 @@
             flat
             hide-details
             :placeholder="selectHint || tm('providerSources.selectHint')"
+            :aria-label="title || tm('providerSources.title')"
             @update:model-value="selectSourceByValue"
         >
             <template #selection="{ item }">
@@ -412,10 +413,14 @@ const selectSourceByValue = (value) => {
   }
 
   .provider-sources-head {
-    padding: 16px 16px 8px;
+    padding: 10px 12px;
     align-items: stretch;
     flex-direction: column;
-    gap: 10px;
+    gap: 0;
+  }
+
+  .provider-sources-head__copy {
+    display: none;
   }
 
   .provider-sources-mobile-select {

@@ -221,13 +221,13 @@ const togglePinnedExtension = (extension) => {
 
 <template>
   <v-tab-item v-show="activeTab === 'installed'">
-    <div class="mb-4 pt-4 pb-4">
+    <div class="plugin-workspace-toolbar">
       <div class="installed-header-row d-flex align-center flex-wrap">
         <v-tabs
           model-value="installed"
           bg-color="transparent"
           class="plugin-view-tabs"
-          height="42"
+          height="40"
         >
           <v-tab
             value="installed"
@@ -252,7 +252,8 @@ const togglePinnedExtension = (extension) => {
             :model-value="pluginSearch"
             @update:model-value="pluginSearch = normalizeTextInput($event)"
             density="compact"
-            :label="tm('search.placeholder')"
+            :placeholder="tm('search.placeholder')"
+            :aria-label="tm('search.placeholder')"
             prepend-inner-icon="mdi-magnify"
             clearable
             variant="solo-filled"
@@ -266,6 +267,10 @@ const togglePinnedExtension = (extension) => {
       </div>
     </div>
 
+    <div v-if="$vuetify.display.xs" class="installed-mobile-actions">
+      <v-btn prepend-icon="mdi-plus" variant="tonal" color="primary" @click="openInstallDialog">{{ tm('market.installPlugin') }}</v-btn>
+      <v-btn prepend-icon="mdi-update" variant="text" :loading="updatingAll" @click="showUpdateAllConfirm">{{ tm('buttons.updateAll') }}</v-btn>
+    </div>
     <v-card
       v-if="failedPluginItems.length > 0"
       class="mb-4 rounded-lg"
@@ -525,6 +530,7 @@ const togglePinnedExtension = (extension) => {
         <button
           v-bind="props"
           type="button"
+          :aria-label="tm('market.installPlugin')"
           class="v-btn v-btn--elevated v-btn--icon v-theme--PurpleThemeDark bg-darkprimary v-btn--density-default v-btn--size-x-large v-btn--variant-elevated fab-button"
           style="
             position: fixed;
@@ -557,6 +563,7 @@ const togglePinnedExtension = (extension) => {
           size="x-large"
           variant="elevated"
           class="update-all-fab"
+          :aria-label="tm('buttons.updateAll')"
           :loading="updatingAll"
           @click="showUpdateAllConfirm"
         />
@@ -566,32 +573,6 @@ const togglePinnedExtension = (extension) => {
 </template>
 
 <style scoped>
-.plugin-view-tabs {
-  background: transparent;
-  flex: 0 0 auto;
-}
-
-.plugin-view-tab {
-  color: rgba(var(--v-theme-on-surface), 0.54);
-  font-size: 1.25rem;
-  font-weight: 650;
-  min-width: 0;
-  padding: 0 10px;
-}
-
-.plugin-view-tab:first-child {
-  padding-left: 0;
-}
-
-.plugin-view-tab.v-tab--selected {
-  color: rgba(var(--v-theme-on-surface), 0.92);
-}
-
-.plugin-view-tabs :deep(.v-tabs-slider) {
-  background: rgba(var(--v-theme-on-surface), 0.5);
-  height: 2px;
-}
-
 .installed-header-row {
   gap: 12px;
 }
@@ -618,10 +599,6 @@ const togglePinnedExtension = (extension) => {
     width: 100%;
   }
 
-  .plugin-view-tab {
-    font-size: 1.125rem;
-    padding-inline: 8px;
-  }
 }
 
 .fab-button {
@@ -647,5 +624,11 @@ const togglePinnedExtension = (extension) => {
 .update-all-fab:hover {
   transform: translateY(-4px) scale(1.05);
   box-shadow: 0 12px 20px rgba(var(--v-theme-primary), 0.4);
+}
+@media (max-width: 600px) {
+  .installed-mobile-actions { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+  .installed-mobile-actions :deep(.v-btn) { min-height: 40px; }
+  .fab-button, .update-all-fab { display: none !important; }
+  .installed-header-row { gap: 6px; }
 }
 </style>

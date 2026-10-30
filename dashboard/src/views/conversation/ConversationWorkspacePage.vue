@@ -102,6 +102,13 @@ const umoQuery = ref(
 const sortValue = ref("updated_at:desc");
 const groupBySession = ref(false);
 const mobileFiltersOpen = ref(false);
+const advancedFiltersOpen = ref(false);
+const hasAdvancedFilters = computed(
+  () => selectedBotIds.value.length > 0 || Boolean(umoQuery.value.trim()),
+);
+watch(mobileFiltersOpen, (open) => {
+  if (open && hasAdvancedFilters.value) advancedFiltersOpen.value = true;
+});
 const expandedSessions = ref<Record<string, boolean>>({});
 const page = ref(1);
 const pageSize = 30;
@@ -693,31 +700,26 @@ function changePage(nextPage: number) {
         size="small"
         :variant="hasFilters ? 'tonal' : 'text'"
         :aria-expanded="mobileFiltersOpen"
+        :aria-label="tm('workspace.filters.title')"
+        :title="tm('workspace.filters.title')"
         aria-haspopup="dialog"
         @click="mobileFiltersOpen = true"
       >
         <SlidersHorizontal :size="15" aria-hidden="true" />
-        <span>{{ tm("workspace.filters.title") }}</span>
+        <span class="workspace-tool-label">{{ tm("workspace.filters.title") }}</span>
         <span v-if="hasFilters" class="filter-status-dot" aria-hidden="true" />
       </v-btn>
       <v-btn
         size="small"
         variant="text"
         :loading="listLoading"
+        :aria-label="tm('workspace.actions.refresh')"
+        :title="tm('workspace.actions.refresh')"
         @click="fetchConversations"
       >
         <RefreshCw :size="15" aria-hidden="true" />
-        <span>{{ tm("workspace.actions.refresh") }}</span>
+        <span class="workspace-tool-label">{{ tm("workspace.actions.refresh") }}</span>
       </v-btn>
-      <RouterLink
-        v-slot="{ href, navigate }"
-        custom
-        :to="{ name: 'ConversationLegacy' }"
-      >
-        <v-btn :href="href" size="small" variant="tonal" @click="navigate">
-          {{ tm("workspace.legacy") }}
-        </v-btn>
-      </RouterLink>
     </div>
 
     <button
@@ -793,39 +795,6 @@ function changePage(nextPage: number) {
         </div>
 
         <div class="filter-block">
-          <div class="filter-label">{{ tm("workspace.filters.robots") }}</div>
-          <div v-if="availableBots.length" class="robot-options">
-            <label
-              v-for="botOption in availableBots"
-              :key="botOption.id"
-              class="robot-option"
-            >
-              <span class="robot-select">
-                <v-checkbox-btn
-                  v-model="selectedBotIds"
-                  :value="botOption.id"
-                  density="compact"
-                  hide-details
-                />
-              </span>
-              <img
-                v-if="platformIcon(botOption)"
-                :src="platformIcon(botOption)"
-                alt=""
-                class="platform-icon"
-              />
-              <span v-else class="platform-icon platform-icon--fallback">
-                <Bot :size="15" aria-hidden="true" />
-              </span>
-              <span class="robot-id">{{ botOption.id }}</span>
-            </label>
-          </div>
-          <div v-else class="filter-empty">
-            {{ tm("workspace.filters.robotEmpty") }}
-          </div>
-        </div>
-
-        <div class="filter-block">
           <div class="filter-label">{{ tm("workspace.filters.types") }}</div>
           <div class="type-options">
             <button
@@ -855,17 +824,6 @@ function changePage(nextPage: number) {
         </div>
 
         <div class="filter-block">
-          <div class="filter-label">
-            {{ tm("workspace.filters.umo") }}
-          </div>
-          <UmoSelector
-            v-model="umoQuery"
-            :label="tm('workspace.filters.umo')"
-            @update:model-value="value => { if (!value) clearUmoQuery() }"
-          />
-        </div>
-
-        <div class="filter-block filter-block--last">
           <label class="filter-label" for="conversation-sort">
             {{ tm("workspace.filters.sort") }}
           </label>
@@ -880,8 +838,68 @@ function changePage(nextPage: number) {
           />
         </div>
 
+        <v-btn
+          class="filter-more-toggle"
+          variant="text"
+          block
+          :aria-expanded="advancedFiltersOpen"
+          @click="advancedFiltersOpen = !advancedFiltersOpen"
+        >
+          <SlidersHorizontal :size="16" aria-hidden="true" />
+          {{ advancedFiltersOpen ? tm("workspace.filters.less") : tm("workspace.filters.more") }}
+          <span v-if="hasAdvancedFilters && !advancedFiltersOpen" class="filter-status-dot" aria-hidden="true" />
+          <ChevronDown
+            :size="16"
+            aria-hidden="true"
+            :class="{ 'filter-more-toggle__chevron--open': advancedFiltersOpen }"
+          />
+        </v-btn>
+
+        <template v-if="advancedFiltersOpen">
+          <div v-if="availableBots.length" class="filter-block">
+            <div class="filter-label">{{ tm("workspace.filters.robots") }}</div>
+            <div class="robot-options">
+              <label
+                v-for="botOption in availableBots"
+                :key="botOption.id"
+                class="robot-option"
+              >
+                <span class="robot-select">
+                  <v-checkbox-btn
+                    v-model="selectedBotIds"
+                    :value="botOption.id"
+                    density="compact"
+                    hide-details
+                  />
+                </span>
+                <img
+                  v-if="platformIcon(botOption)"
+                  :src="platformIcon(botOption)"
+                  alt=""
+                  class="platform-icon"
+                />
+                <span v-else class="platform-icon platform-icon--fallback">
+                  <Bot :size="15" aria-hidden="true" />
+                </span>
+                <span class="robot-id">{{ botOption.id }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <div class="filter-label">
+              {{ tm("workspace.filters.umo") }}
+            </div>
+            <UmoSelector
+              v-model="umoQuery"
+              :label="tm('workspace.filters.umo')"
+              @update:model-value="value => { if (!value) clearUmoQuery() }"
+            />
+          </div>
+        </template>
+
         <div class="mobile-filter-footer">
-          <v-btn block variant="tonal" @click="mobileFiltersOpen = false">
+          <v-btn block color="primary" variant="flat" @click="mobileFiltersOpen = false">
             {{ tm("workspace.filters.done") }}
           </v-btn>
         </div>
@@ -952,7 +970,7 @@ function changePage(nextPage: number) {
           </div>
         </header>
 
-        <label class="select-page-row">
+        <label v-if="conversations.length" class="select-page-row">
           <v-checkbox-btn
             :model-value="allPageSelected"
             :indeterminate="somePageSelected"
@@ -1141,7 +1159,7 @@ function changePage(nextPage: number) {
           </template>
         </div>
 
-        <footer class="pagination-bar">
+        <footer v-if="conversations.length" class="pagination-bar">
           <v-btn
             icon
             size="x-small"
@@ -1360,19 +1378,21 @@ function changePage(nextPage: number) {
 
 <style scoped>
 .conversation-workspace {
-  --workspace-card: #f5f6f7;
-  --workspace-surface: rgb(var(--v-theme-surface));
+  display: flex;
+  flex-direction: column;
+  --workspace-card: var(--color-surface);
+  --workspace-surface: var(--color-surface-raised);
   --workspace-muted: rgba(var(--v-theme-on-surface), 0.58);
-  --workspace-subtle: rgba(var(--v-theme-on-surface), 0.08);
+  --workspace-subtle: var(--color-line);
   min-height: 0;
   overflow: hidden;
   padding: 0 12px 8px;
 }
 
 .conversation-workspace.is-dark {
-  --workspace-card: rgba(var(--v-theme-on-surface), 0.06);
-  --workspace-surface: rgba(var(--v-theme-on-surface), 0.035);
-  --workspace-subtle: rgba(var(--v-theme-on-surface), 0.1);
+  --workspace-card: var(--color-surface);
+  --workspace-surface: var(--color-surface-raised);
+  --workspace-subtle: var(--color-line);
 }
 
 .workspace-actions {
@@ -1406,10 +1426,11 @@ function changePage(nextPage: number) {
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(220px, 252px) minmax(420px, 1fr);
-  height: calc(100dvh - 154px);
+  flex: 1;
+  width: 100%;
   margin: 0 auto;
   max-width: 1560px;
-  min-height: 560px;
+  min-height: 0;
 }
 
 .workspace-grid--preview {
@@ -1421,8 +1442,8 @@ function changePage(nextPage: number) {
 
 .workspace-card {
   background: var(--workspace-card);
-  border: 0;
-  border-radius: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
   min-width: 0;
   overflow: hidden;
 }
@@ -1475,8 +1496,28 @@ function changePage(nextPage: number) {
   margin-bottom: 8px;
 }
 
+.filter-more-toggle {
+  justify-content: flex-start;
+  min-height: 40px;
+  margin-top: 10px;
+  padding-inline: 6px;
+  color: var(--color-ink-soft);
+  text-transform: none;
+}
+
+.filter-more-toggle :deep(.v-btn__content) {
+  gap: 6px;
+  font-size: 13px;
+}
+
+.filter-more-toggle__chevron--open {
+  transform: rotate(180deg);
+  transition: transform 0.18s ease;
+}
+
 .filter-panel :deep(.v-field) {
   background: var(--workspace-surface);
+  border: 1px solid var(--color-line);
   border-radius: 10px;
   box-shadow: none;
   font-size: 0.8rem;
@@ -1594,14 +1635,14 @@ function changePage(nextPage: number) {
 .type-option {
   align-items: center;
   background: var(--workspace-surface);
-  border: 0;
+  border: 1px solid var(--color-line);
   border-radius: 9px;
   color: rgba(var(--v-theme-on-surface), 0.7);
   cursor: pointer;
   display: flex;
   font-size: 0.76rem;
   gap: 5px;
-  height: 34px;
+  min-height: 40px;
   justify-content: center;
 }
 
@@ -2012,7 +2053,7 @@ function changePage(nextPage: number) {
   }
 
   .mobile-preview-backdrop {
-    background: rgba(0, 0, 0, 0.42);
+    background: var(--overlay-background);
     border: 0;
     display: block;
     inset: 0;
@@ -2022,14 +2063,16 @@ function changePage(nextPage: number) {
   }
 
   .workspace-grid--preview .preview-panel {
-    border-radius: 20px;
-    bottom: max(8px, env(safe-area-inset-bottom));
-    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.24);
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-panel);
+    bottom: calc(100dvh - var(--astrbot-viewport-height, 100dvh) - var(--astrbot-vv-offset-top, 0px) + max(8px, var(--astrbot-safe-bottom, 0px)));
+    box-shadow: 0 18px 52px rgba(60, 51, 42, 0.24);
     grid-column: auto;
     left: 8px;
     position: fixed;
     right: 8px;
-    top: max(8px, env(safe-area-inset-top));
+    top: calc(var(--astrbot-vv-offset-top, 0px) + max(8px, var(--astrbot-safe-top, 0px)));
     z-index: 2300;
   }
 
@@ -2038,24 +2081,27 @@ function changePage(nextPage: number) {
   }
 
   .mobile-filter-backdrop {
-    background: rgba(0, 0, 0, 0.42);
+    background: var(--overlay-background);
     border: 0;
     display: block;
     inset: 0;
     position: fixed;
     touch-action: none;
-    z-index: 2990;
+    z-index: 1800;
   }
 
   .filter-panel {
-    border-radius: 20px 20px 0 0;
-    bottom: 0;
-    box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.18);
+    background: var(--color-surface) !important;
+    border: 1px solid var(--color-line-strong);
+    border-bottom: 0;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+    bottom: calc(100dvh - var(--astrbot-viewport-height, 100dvh) - var(--astrbot-vv-offset-top, 0px));
+    box-shadow: 0 -14px 40px rgba(60, 51, 42, 0.18);
     left: 0;
-    max-height: min(86dvh, 760px);
+    max-height: min(calc(var(--astrbot-viewport-height, 100dvh) - var(--astrbot-safe-top, 0px) - 16px), 760px);
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 18px 18px calc(16px + env(safe-area-inset-bottom));
+    padding: 18px 18px 0;
     position: fixed;
     right: 0;
     transform: translateY(calc(100% + 20px));
@@ -2063,7 +2109,7 @@ function changePage(nextPage: number) {
       transform 0.22s ease,
       visibility 0s linear 0.22s;
     visibility: hidden;
-    z-index: 3000;
+    z-index: 1900;
   }
 
   .filter-panel--mobile-open {
@@ -2077,12 +2123,17 @@ function changePage(nextPage: number) {
   }
 
   .mobile-filter-footer {
-    background: var(--workspace-card);
-    bottom: calc(-16px - env(safe-area-inset-bottom));
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-line);
+    bottom: 0;
     display: block;
     margin: 18px -18px 0;
-    padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+    padding: 12px 18px calc(12px + var(--astrbot-safe-bottom, 0px));
     position: sticky;
+  }
+
+  .mobile-filter-footer :deep(.v-btn) {
+    width: 100%;
   }
 
   .conversation-list {
@@ -2117,5 +2168,9 @@ function changePage(nextPage: number) {
   .row-meta > span:nth-child(2) {
     display: none;
   }
+}
+@media (max-width: 600px) {
+  .workspace-tool-label { display: none; }
+  .workspace-actions .v-btn:has(svg) { min-width: 40px; width: 40px; height: 40px; padding: 0; }
 }
 </style>

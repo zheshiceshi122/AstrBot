@@ -1,7 +1,7 @@
 <template>
-  <div class="provider-page">
+  <div ref="pageRoot" class="provider-page">
     <v-container fluid class="pa-0">
-      <div class="provider-tabs-scroll">
+      <PageToolbar class="provider-tabs-scroll">
         <div
           class="provider-tabs"
           role="tablist"
@@ -21,10 +21,10 @@
             <span>{{ type.label }}</span>
           </button>
         </div>
-      </div>
+      </PageToolbar>
 
-      <div class="provider-content">
-        <div class="provider-workbench">
+      <div class="provider-content" :class="{ 'is-empty': (selectedProviderType === 'chat_completion' ? displayedProviderSources.length : displayedLegacyProviders.length) === 0 && !loadingSources }">
+        <div class="provider-workbench" :class="{ 'is-empty': (selectedProviderType === 'chat_completion' ? displayedProviderSources.length : displayedLegacyProviders.length) === 0 && !loadingSources }" :inert="connection.busy || savingSource || loadingModels || undefined">
           <div class="provider-workbench__sidebar">
             <ProviderSourcesPanel
               :displayed-provider-sources="selectedProviderType === 'chat_completion'
@@ -64,45 +64,24 @@
           <div class="provider-workbench__main">
             <template v-if="selectedProviderType === 'chat_completion'">
             <div v-if="selectedProviderSource" class="provider-config-shell">
-              <div class="provider-config-header">
-                <div class="provider-config-headline">
-                  <div class="provider-config-title">{{ selectedProviderSource.id }}</div>
-                  <ProviderSourceSubtitle
-                    class="provider-config-subtitle"
-                    :api-base="selectedProviderSource.api_base"
-                    :sponsor="selectedSponsor"
-                    :tm="tm"
-                  />
-                </div>
-
-                <div class="provider-config-actions">
-                  <v-btn
-                    color="primary"
-                    prepend-icon="mdi-content-save-outline"
-                    :loading="savingSource"
-                    :disabled="!isSourceModified"
-                    variant="tonal"
-                    rounded="xl"
-                    @click="saveProviderSource"
-                  >
-                    {{ tm('providerSources.save') }}
-                  </v-btn>
-                </div>
+              <div v-if="selectedSponsor" class="provider-config-header">
+                <ProviderSourceSubtitle :api-base="selectedProviderSource.api_base" :sponsor="selectedSponsor" :tm="tm" />
               </div>
 
-              <v-divider></v-divider>
-
               <div class="provider-config-body">
-                <section class="provider-section config-form">
-                  <div class="provider-section-head">
-                    <div class="provider-section-title">{{ tm('providers.settings') }}</div>
-                  </div>
-                  <AstrBotConfig
-                    v-if="basicSourceConfig"
-                    :iterable="basicSourceConfig"
-                    :metadata="providerSourceSchema"
-                    metadataKey="provider"
-                    :is-editing="true"
+                <section class="provider-section">
+                  <ProviderConnectionForm
+                    :source="basicSourceConfig"
+                    :connection="connection"
+                    :available-models="availableModels"
+                    :configured-models="sourceProviders"
+                    :loading-models="loadingModels"
+                    :saving-source="savingSource"
+                    :modified="isSourceModified"
+                    :tm="tm"
+                    @save="saveConnection"
+                    @fetch-models="fetchAvailableModels"
+                    @reload-profiles="loadConnectionProfiles"
                   />
                 </section>
 
@@ -129,22 +108,19 @@
 
                 <v-divider></v-divider>
 
-                <section class="provider-section provider-section--models">
+                <section v-if="sourceProviders.length || availableModels.length" class="provider-section provider-section--models">
                   <ProviderModelsPanel
                     :entries="filteredMergedModelEntries"
                     :available-count="availableModels.length"
                     v-model:model-search="modelSearch"
-                    :loading-models="loadingModels"
-                    :is-source-modified="isSourceModified"
                     :supports-image-input="supportsImageInput"
                     :supports-audio-input="supportsAudioInput"
                     :supports-tool-call="supportsToolCall"
                     :supports-reasoning="supportsReasoning"
                     :format-context-limit="formatContextLimit"
                     :testing-providers="testingProviders"
+                    :saving-providers="savingProviderToggles"
                     :tm="tm"
-                    @fetch-models="fetchAvailableModels"
-                    @open-manual-model="openManualModelDialog"
                     @open-provider-edit="openProviderEdit"
                     @toggle-provider-enable="toggleProviderEnable"
                     @test-provider="testProvider"
@@ -254,37 +230,6 @@
       </div>
     </v-container>
 
-    <v-dialog v-model="showManualModelDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-h3 pa-4 pb-0 pl-6">
-          {{ tm('models.manualDialogTitle') }}
-        </v-card-title>
-        <v-card-text class="py-4">
-          <v-text-field
-            v-model="manualModelId"
-            :label="tm('models.manualDialogModelLabel')"
-            flat
-            variant="solo-filled"
-            autofocus
-            clearable
-          ></v-text-field>
-          <v-text-field
-            :model-value="manualProviderId"
-            flat
-            variant="solo-filled"
-            :label="tm('models.manualDialogPreviewLabel')"
-            persistent-hint
-            :hint="tm('models.manualDialogPreviewHint')"
-          ></v-text-field>
-        </v-card-text>
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showManualModelDialog = false">取消</v-btn>
-          <v-btn color="primary" variant="tonal" @click="confirmManualModel">添加</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <v-dialog v-model="showProviderEditDialog" width="800">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">
@@ -328,11 +273,13 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import PageToolbar from '@/components/shared/PageToolbar.vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { providerApi } from '@/api/v1'
 import { useModuleI18n } from '@/i18n/composables'
 import AstrBotConfig from '@/components/shared/AstrBotConfig.vue'
 import ProviderModelsPanel from '@/components/provider/ProviderModelsPanel.vue'
+import ProviderConnectionForm from '@/components/provider/ProviderConnectionForm.vue'
 import ProviderSourceSubtitle from '@/components/provider/ProviderSourceSubtitle.vue'
 import ProviderSourcesPanel from '@/components/provider/ProviderSourcesPanel.vue'
 import { useProviderModelConfigDialog } from '@/composables/useProviderModelConfigDialog'
@@ -366,11 +313,11 @@ const {
   loadingSources,
   loadingModels,
   savingSource,
+  savingProviderToggles,
   testingProviders,
   isSourceModified,
   configSchema,
   providerSourceSchema,
-  manualModelId,
   modelSearch,
   providerTypes,
   availableSourceTypes,
@@ -378,8 +325,11 @@ const {
   filteredMergedModelEntries,
   filteredProviders,
   basicSourceConfig,
+  sourceProviders,
+  connection,
+  saveConnection,
+  loadConnectionProfiles,
   advancedSourceConfig,
-  manualProviderId,
   resolveSourceIcon,
   isMonochromeSourceIcon,
   getSourceDisplayName,
@@ -392,7 +342,6 @@ const {
   selectProviderSource,
   addProviderSource,
   deleteProviderSource,
-  saveProviderSource,
   fetchAvailableModels,
   buildModelProviderConfig,
   deleteProvider,
@@ -405,6 +354,18 @@ const {
   tm,
   showMessage
 })
+
+// The provider types are a single scrollable row on phones. Keep the active tab
+// in view so switching types never leaves the selected tab half off screen.
+const pageRoot = ref<HTMLElement | null>(null)
+const revealSelectedProviderTab = () => {
+  nextTick(() => {
+    const tab = pageRoot.value?.querySelector('.provider-tab--active')
+    tab?.scrollIntoView({ block: 'nearest', inline: 'center' })
+  })
+}
+watch(selectedProviderType, revealSelectedProviderTab)
+onMounted(revealSelectedProviderTab)
 
 const legacyConfigSchema = computed(() => {
   const schema = JSON.parse(JSON.stringify(configSchema.value || {}))
@@ -457,7 +418,6 @@ const legacyConfigSections = computed(() => {
   }
   return { basic, advanced }
 })
-const showManualModelDialog = ref(false)
 let suppressLegacyProviderWatch = false
 
 const displayedLegacyProviders = computed(() => [
@@ -485,33 +445,6 @@ const {
   tm,
   showMessage
 })
-
-function openManualModelDialog() {
-  if (!selectedProviderSource.value) {
-    showMessage(tm('providerSources.selectHint'), 'error')
-    return
-  }
-  manualModelId.value = ''
-  showManualModelDialog.value = true
-}
-
-async function confirmManualModel() {
-  const modelId = manualModelId.value.trim()
-  if (!selectedProviderSource.value) {
-    showMessage(tm('providerSources.selectHint'), 'error')
-    return
-  }
-  if (!modelId) {
-    showMessage(tm('models.manualModelRequired'), 'error')
-    return
-  }
-  if (modelAlreadyConfigured(modelId)) {
-    showMessage(tm('models.manualModelExists'), 'error')
-    return
-  }
-  showManualModelDialog.value = false
-  openModelAddDialog(modelId)
-}
 
 watch(() => props.defaultTab, (val) => {
   updateDefaultTab(val)
@@ -770,24 +703,24 @@ async function testSingleProvider(provider) {
   font-size: 0.8125rem;
   font-weight: 500;
   gap: 6px;
-  height: 34px;
+  height: 40px;
   padding: 0 12px;
   white-space: nowrap;
 }
 
 .provider-tab:hover {
-  background: rgba(var(--v-theme-on-surface), 0.045);
-  color: rgba(var(--v-theme-on-surface), 0.78);
+  background: rgba(var(--v-theme-primary), 0.06);
+  color: rgb(var(--v-theme-primary));
 }
 
 .provider-tab--active {
-  background: rgba(var(--v-theme-on-surface), 0.065);
-  color: rgba(var(--v-theme-on-surface), 0.86);
+  background: var(--color-accent-soft);
+  color: rgb(var(--v-theme-primary));
 }
 
 .provider-tab--active:hover {
-  background: rgba(var(--v-theme-on-surface), 0.09);
-  color: rgba(var(--v-theme-on-surface), 0.9);
+  background: rgba(var(--v-theme-primary), 0.18);
+  color: rgb(var(--v-theme-primary));
 }
 
 .provider-content {
@@ -806,10 +739,27 @@ async function testSingleProvider(provider) {
   background: var(--provider-surface);
   display: grid;
   flex: 1;
-  grid-template-columns: minmax(280px, 320px) 1px minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 260px) 1px minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
   width: 100%;
+}
+
+/* An empty source list needs no detail pane, on desktop or phone. */
+.provider-workbench.is-empty {
+  flex: 0 0 auto;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  min-height: 300px;
+}
+
+.provider-workbench.is-empty .provider-workbench__divider,
+.provider-workbench.is-empty .provider-workbench__main {
+  display: none;
+}
+
+.provider-content.is-empty {
+  align-items: flex-start;
 }
 
 .provider-workbench__sidebar,
@@ -842,7 +792,7 @@ async function testSingleProvider(provider) {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  padding: 18px 22px 14px;
+  padding: 14px 18px 10px;
   position: relative;
   z-index: 1;
 }
@@ -884,7 +834,7 @@ async function testSingleProvider(provider) {
 }
 
 .provider-section {
-  padding: 18px 22px;
+  padding: 16px 18px;
 }
 
 .provider-section--models {
@@ -947,14 +897,33 @@ async function testSingleProvider(provider) {
     grid-template-rows: auto 1px minmax(0, 1fr);
   }
 
+  /* An empty source list already explains itself; the detail pane's duplicate
+     "select a provider" state only adds a second, contradictory empty card. */
+  .provider-workbench.is-empty {
+    grid-template-rows: auto;
+    flex: 0 0 auto;
+  }
+
+  .provider-content.is-empty {
+    align-items: flex-start;
+  }
+
+  .provider-workbench.is-empty .provider-workbench__sidebar {
+    min-height: 300px;
+  }
+
+  .provider-workbench.is-empty .provider-workbench__divider,
+  .provider-workbench.is-empty .provider-workbench__main {
+    display: none;
+  }
+
   .provider-workbench__divider {
     height: 1px;
   }
 
   .provider-config-header {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 16px;
+    align-items: center;
+    padding: 12px;
   }
 
   .provider-config-actions :deep(.v-btn) {
@@ -968,21 +937,38 @@ async function testSingleProvider(provider) {
   }
 
   .provider-section {
-    padding: 16px;
+    padding: 12px;
   }
 }
 
 @media (max-width: 600px) {
   .provider-tabs-scroll {
-    padding-inline: 4px;
+    overflow: visible;
+    padding: 2px 4px 6px;
+  }
+
+  /* The back button and options menu stay pinned; only the type strip swipes.
+     The trailing fade is the affordance that more types exist off screen. */
+  .provider-tabs-scroll :deep(.page-toolbar__content) {
+    overflow-x: auto;
+    padding-right: 12px;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 18px), transparent 100%);
+  }
+  .provider-tabs-scroll :deep(.page-toolbar__content)::-webkit-scrollbar { display: none; }
+
+  .provider-tabs {
+    min-width: max-content;
+  }
+
+  .provider-tab {
+    flex-shrink: 0;
+    padding-inline: 8px;
+    font-size: 12px;
   }
 
   .provider-workbench {
     border-radius: 12px;
-  }
-
-  .provider-tab {
-    padding-inline: 11px;
   }
 
   .provider-config-title {
@@ -993,6 +979,10 @@ async function testSingleProvider(provider) {
     min-height: 260px;
     padding: 24px;
   }
+
+  .provider-content { padding: 6px 4px; }
+  .provider-section { padding: 10px; }
+  .provider-section-title { font-size: 14px; }
 }
 </style>
 

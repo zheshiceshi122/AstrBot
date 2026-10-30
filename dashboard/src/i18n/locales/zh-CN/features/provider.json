@@ -145,6 +145,27 @@
       "proxy": "代理地址"
     }
   },
+  "connection": {
+    "help": "填写说明",
+    "title": "连接与模型",
+    "model": "模型",
+    "modelPlaceholder": "输入模型 ID，或获取列表后选择",
+    "modelHint": "支持直接填写模型 ID，无需先获取列表。",
+    "applyTo": "用于聊天的配置文件",
+    "saveOnly": "仅保存模型，暂不切换",
+    "profileHint": "只修改所选配置文件的对话模型；会话单独指定的模型不变。",
+    "profilesError": "配置文件加载失败，仍可保存 API 和模型。",
+    "reloadProfiles": "重新加载配置文件",
+    "unsaved": "有未保存的修改",
+    "saveAndUse": "保存并使用",
+    "saveModel": "保存 API 和模型",
+    "saved": "模型 {model} 已保存，可在上方选择配置文件并应用。",
+    "applied": "已将 {model} 用于「{name}」的聊天。",
+    "modelSaveError": "模型未保存成功，请检查错误后再次保存。",
+    "profileSaveError": "未能应用到配置文件。",
+    "savedButNotApplied": "模型 {model} 已保存，但尚未应用：{error}",
+    "thirdPartyRunner": "该配置文件使用第三方 Agent，未更改执行器。请在此选择使用 AstrBot 内置 AI 的配置文件。"
+  },
   "models": {
     "title": "模型",
     "available": "可用模型",

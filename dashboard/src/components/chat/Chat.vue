@@ -2127,10 +2127,9 @@ async function stopCurrentSession() {
 .chat-ui {
   /* Side panels live inside .chat-main, which already starts below the 40px
      window toolbar. Keep them flush with the content area's top edge. */
-  --chat-panel-top-offset: 0px;
-  --chat-session-active-bg: #efefef;
-  --chat-page-bg: #fdfcfc;
-  --chat-border: #f2f2f2;
+  --chat-panel-top-offset: 0px;  --chat-session-active-bg: var(--color-accent-soft);
+  --chat-page-bg: var(--color-canvas);
+  --chat-border: var(--color-line);
   --chat-muted: rgba(var(--v-theme-on-surface), 0.62);
   --chat-section-label: rgba(var(--v-theme-on-surface), 0.48);
   --chat-content-width: 76%;
@@ -2156,10 +2155,10 @@ async function stopCurrentSession() {
 }
 
 .chat-ui.is-dark {
-  --chat-session-active-bg: rgba(255, 255, 255, 0.08);
-  --chat-page-bg: rgb(var(--v-theme-background));
-  --chat-border: rgba(255, 255, 255, 0.1);
-  --chat-section-label: rgba(255, 255, 255, 0.5);
+  --chat-session-active-bg: var(--color-accent-soft);
+  --chat-page-bg: var(--color-canvas);
+  --chat-border: var(--color-line);
+  --chat-section-label: rgba(var(--v-theme-on-surface), 0.48);
 }
 
 .chat-ui.is-dark .chat-sidebar {
@@ -2170,7 +2169,7 @@ async function stopCurrentSession() {
    tail and the Settings footer) stays above the mobile browsers' toolbar area. */
 .chat-sidebar {
   top: 0 !important;
-  height: 100dvh !important;
+  height: var(--astrbot-viewport-height, 100dvh) !important;
   background: var(--astrbot-chrome-bg, rgb(var(--v-theme-surface)));
   border-right: 0;
   user-select: none;
@@ -2198,6 +2197,11 @@ async function stopCurrentSession() {
    toolbar band itself instead of clearing it. */
 :global(html:not([data-astrbot-desktop-platform='macos']) .chat-sidebar .v-navigation-drawer__content) {
   padding-top: 4px;
+}
+
+:global(html[data-mobile-standalone='true'] .chat-sidebar .v-navigation-drawer__content) {
+  padding-top: calc(4px + var(--astrbot-safe-top));
+  padding-bottom: var(--astrbot-safe-bottom);
 }
 
 :global(html:not([data-astrbot-desktop-platform='macos']) .chat-sidebar .chat-sidebar-brand) {
@@ -2920,6 +2924,60 @@ kbd {
   .composer-shell,
   .project-composer-shell {
     padding: 0;
+  }
+}
+
+/* The session drawer is the primary navigation on a phone; everything in it
+   uses the same 40px touch height as the rest of the mobile shell. */
+@media (max-width: 959.98px) {
+  .new-chat-btn,
+  .settings-btn {
+    min-height: 40px;
+    height: 40px;
+  }
+
+  .new-chat-btn.icon-only,
+  .settings-btn.icon-only {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+  }
+
+  .session-action-btn,
+  .section-action-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+
+  .chat-sidebar-brand-toggle,
+  .chat-sidebar-rail-btn {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+
+  /* There is no hover on a touch screen, so row actions must not wait for it:
+     rename and delete stay visible on every conversation row. */
+  .session-item {
+    min-height: 48px;
+    padding-right: 84px;
+  }
+
+  .session-actions {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .session-item .session-progress {
+    right: 84px;
+  }
+
+  .session-item:hover .session-progress,
+  .session-item:focus-within .session-progress {
+    opacity: 1;
+    visibility: visible;
   }
 }
 </style>

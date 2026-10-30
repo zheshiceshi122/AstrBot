@@ -18,15 +18,23 @@
 </template>
 
 <script setup>
-import { RouterView } from 'vue-router';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { RouterView, useRoute } from 'vue-router';
+import { computed, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/toast'
+import { mobileViewportPortraitKey, useMobileViewport } from '@/composables/useMobileViewport'
 import WaitingForRestart from '@/components/shared/WaitingForRestart.vue'
 import UpgradeRecoveryDialog from '@/components/shared/UpgradeRecoveryDialog.vue'
 
 const toastStore = useToastStore()
 const globalWaitingRef = ref(null)
 let disposeTrayRestartListener = null
+
+// The keyboard shell is installed at the app root so the login/setup screens
+// get the same viewport handling as the dashboard.
+const { dismissKeyboard, portrait } = useMobileViewport()
+provide(mobileViewportPortraitKey, portrait)
+const route = useRoute()
+watch(() => route.fullPath, dismissKeyboard)
 
 const snackbarShow = computed({
   get: () => !!toastStore.current,

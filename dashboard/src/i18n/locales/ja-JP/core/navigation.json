@@ -5,7 +5,7 @@
   "providers": "モデルプロバイダー",
   "commands": "コマンド管理",
   "persona": "ペルソナ設定",
-  "data": "データとログ",
+  "data": "ワークベンチ",
   "dataTabs": {
     "statistics": "統計",
     "conversations": "会話",
@@ -26,6 +26,8 @@
   "chat": "チャット",
   "botMode": "ボット",
   "options": "オプション",
+  "copyLayoutInfo": "レイアウト情報をコピー",
+  "layoutInfoHelp": "サイズ・安全領域・位置のみ。会話や設定は含みません",
   "cron": "スケジュールタスク",
   "conversation": "会話データ",
   "sessionManagement": "カスタムルール",
@@ -64,5 +66,36 @@
     "system": "システム設定"
   },
   "pluginView": "プラグインビュー",
-  "pluginViewType": "プラグインビュー"
+  "pluginViewType": "プラグインビュー",
+  "mobileExtensions": "拡張機能",
+  "mobileSettings": "設定",
+  "mobileNavigation": "メインナビゲーション",
+  "sectionNavigation": "セクションナビゲーション",
+  "modelsAndApi": "モデルと API",
+  "retry": "再読み込み",
+  "computerAccessScope": "default 設定に適用され、変更は即時保存されます。",
+  "computerAccessSandbox": "現在はサンドボックスを使用中です。オフにするとコンピューター操作を無効化し、再度オンにするとローカル環境を使用します。",
+  "hubGroups": {
+    "dialogue": "会話設定",
+    "tools": "プラグインとツール"
+  },
+  "hubHints": {
+    "providers": "接続先、API キー、モデルを設定します。",
+    "config": "設定ごとのモデル、応答、機能を管理します。",
+    "general": "実行環境、タイムゾーン、ストレージ整理。",
+    "appearance": "画面のテーマカラーを調整します。",
+    "network": "接続、ミラー、プロキシを設定します。",
+    "security": "管理画面へのアクセスとセキュリティ。",
+    "maintenance": "バックアップ、復元、診断と保守。",
+    "openapi": "外部アプリ用 API キーを管理します。",
+    "resources": "ドキュメント、FAQ、更新履歴。",
+    "about": "バージョンとプロジェクト情報。",
+    "persona": "キャラクターと会話スタイルを編集します。",
+    "knowledgeBase": "文書と知識検索を管理します。",
+    "extension": "プラグインの追加、設定、管理。",
+    "mcp": "外部ツールサービスに接続します。",
+    "skills": "Agent が使えるスキルを管理します。",
+    "components": "コマンドなどのプラグイン動作を管理します。",
+    "subagent": "サブエージェントとタスク分担を設定します。"
+  }
 }

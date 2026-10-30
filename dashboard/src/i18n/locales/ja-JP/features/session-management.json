@@ -39,7 +39,8 @@
       "umoInfo": "メッセージ送信元（UMO）",
       "rulesOverview": "ルール概要",
       "actions": "操作"
-    }
+    },
+    "selectAll": "このページをすべて選択"
   },
   "persona": {
     "none": "設定ファイルに従う"

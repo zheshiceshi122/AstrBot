@@ -61,8 +61,8 @@ const statusItems = [
 
 <template>
   <!-- 过滤器行 -->
-  <v-row class="mb-4" align="center">
-    <v-col cols="12" sm="6" md="3">
+  <div class="command-filter-grid">
+    <div>
       <v-select
         :model-value="pluginFilter"
         @update:model-value="emit('update:pluginFilter', $event)"
@@ -72,8 +72,8 @@ const statusItems = [
         variant="outlined"
         hide-details
       />
-    </v-col>
-    <v-col cols="12" sm="6" md="2">
+    </div>
+    <div>
       <v-select
         :model-value="typeFilter"
         @update:model-value="emit('update:typeFilter', $event)"
@@ -83,8 +83,8 @@ const statusItems = [
         variant="outlined"
         hide-details
       />
-    </v-col>
-    <v-col cols="12" sm="6" md="2">
+    </div>
+    <div>
       <v-select
         :model-value="permissionFilter"
         @update:model-value="emit('update:permissionFilter', $event)"
@@ -94,8 +94,8 @@ const statusItems = [
         variant="outlined"
         hide-details
       />
-    </v-col>
-    <v-col cols="12" sm="6" md="2">
+    </div>
+    <div>
       <v-select
         :model-value="statusFilter"
         @update:model-value="emit('update:statusFilter', $event)"
@@ -105,12 +105,12 @@ const statusItems = [
         variant="outlined"
         hide-details
       />
-    </v-col>
-  </v-row>
+    </div>
+  </div>
 
   <!-- 搜索栏 + 统计信息行 -->
-  <div class="mb-4 d-flex flex-wrap align-center ga-4">
-    <div style="min-width: 200px; max-width: 350px; flex: 1; border: 1px solid #B9B9B9; border-radius: 16px;">
+  <div class="command-search-summary">
+    <div class="command-search-input">
       <v-text-field
         :model-value="searchQuery"
         @update:model-value="emit('update:searchQuery', normalizeTextInput($event))"
@@ -124,7 +124,7 @@ const statusItems = [
         single-line
       />
     </div>
-    <div class="d-flex align-center ga-4">
+    <div class="d-flex align-center flex-wrap ga-2">
       <slot name="stats"></slot>
       <v-divider vertical class="mx-1" style="height: 20px;" />
       <v-checkbox
@@ -157,5 +157,12 @@ const statusItems = [
 
 .system-plugin-checkbox :deep(.v-selection-control) {
   min-height: auto;
+}
+.command-filter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 8px 0 12px; }
+.command-search-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+.command-search-input { min-width: 0; max-width: 350px; flex: 1 1 200px; }
+@media (max-width: 600px) {
+  .command-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 8px; margin: 6px 0 10px; }
+  .command-search-summary { margin-bottom: 8px; }
 }
 </style>

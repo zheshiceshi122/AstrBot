@@ -1,0 +1,278 @@
+/* Page toolbars shared by the extension sections and tool pages. */
+.v-dialog.v-dialog--scrollable > .v-overlay__content > .v-card > .config-editor-body {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tool-page-header {
+  margin: 8px 0 4px;
+}
+.tool-page-title { min-width: 0; }
+.tool-page-title h2 { margin: 0; font-size: 22px; line-height: 1.3; }
+.tool-page-actions { display: flex; align-items: center; gap: 6px; }
+.tool-page-actions .v-btn__content { gap: 6px; }
+.tool-page-description { margin: 0 0 10px; font-size: 13px; line-height: 1.45; color: rgba(var(--v-theme-on-surface), .65); }
+
+/*
+ * Phone layout.
+ *
+ * The interaction scale is 40px: buttons, icon buttons, tabs, fields and list
+ * rows all settle on the same height so a thumb can hit them without hunting.
+ * 40px is smaller than the 44px platform ideal, but keeps the density of a
+ * management console while still being comfortable on a 390px screen.
+ *
+ * Inputs stay at 16px because iOS Safari zooms the page when a focused field is
+ * smaller, which used to push dialogs off screen.
+ */
+@media (max-width: 600px) {
+  .tool-page-header { margin: 0 0 2px; gap: 2px 8px; }
+  .tool-page-title h2 { font-size: 19px; }
+  .tool-page-description { font-size: 12px; line-height: 1.5; }
+  .tool-page-action-label { display: none; }
+  .mobile-navigation-shell .tool-page-actions .v-btn { width: 40px; padding: 0; }
+
+  /* ---- Shared touch scale ------------------------------------------------ */
+  .mobile-navigation-shell .v-btn,
+  .v-overlay-container .v-btn {
+    height: auto;
+    min-height: 40px;
+    min-width: 40px;
+    padding-inline: 12px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .mobile-navigation-shell .v-btn--icon,
+  .v-overlay-container .v-btn--icon {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+  .mobile-navigation-shell .v-btn--size-small,
+  .v-overlay-container .v-btn--size-small { font-size: 13px; }
+  .mobile-navigation-shell .v-btn-toggle .v-btn { min-height: 40px; }
+
+  .mobile-navigation-shell .v-tab,
+  .v-overlay-container .v-tab {
+    min-height: 40px;
+    padding-inline: 12px;
+    font-size: 13px;
+  }
+
+  .mobile-navigation-shell .v-field,
+  .v-overlay-container .v-field {
+    --v-input-control-height: 40px;
+    --v-field-padding-top: 8px;
+    --v-field-padding-bottom: 6px;
+  }
+  .mobile-navigation-shell .v-field__input,
+  .v-overlay-container .v-field__input {
+    min-width: 0;
+    font-size: 16px;
+  }
+  /* The visible v-field is a wrapper; Vuetify's inner input keeps its own
+     font-size. Raise that too, otherwise iOS still zooms on focus. */
+  .mobile-navigation-shell .v-field__input input,
+  .mobile-navigation-shell .v-field__input textarea,
+  .v-overlay-container .v-field__input input,
+  .v-overlay-container .v-field__input textarea {
+    font-size: 16px;
+  }
+  .mobile-navigation-shell .v-field:not(.v-field--variant-plain),
+  .v-overlay-container .v-field:not(.v-field--variant-plain) {
+    --v-field-padding-top: 8px;
+    --v-field-padding-bottom: 6px;
+  }
+
+  .mobile-navigation-shell .v-selection-control,
+  .v-overlay-container .v-selection-control { min-height: 40px; }
+  .mobile-navigation-shell .v-switch {
+    --v-input-control-height: 40px;
+    --v-selection-control-size: 40px;
+  }
+  .mobile-navigation-shell .v-switch--inset .v-switch__track {
+    min-width: 38px;
+    width: 38px;
+    height: 22px;
+  }
+  .mobile-navigation-shell .v-switch--inset .v-switch__thumb { width: 18px; height: 18px; }
+  .mobile-navigation-shell .v-switch--inset .v-selection-control__input { transform: translateX(-8px); }
+  .mobile-navigation-shell .v-switch--inset .v-selection-control--dirty .v-selection-control__input { transform: translateX(8px); }
+
+  /* Chips stay visually compact; only the row they sit in grows. */
+  .mobile-navigation-shell .v-chip { max-width: 100%; font-size: 12px; }
+
+  .mobile-navigation-shell .header-back-link,
+  .mobile-navigation-shell .header-menu-btn,
+  .mobile-navigation-shell .header-actions .v-btn {
+    height: 40px;
+    min-width: 40px;
+    padding-inline: 8px;
+    font-size: 13px;
+  }
+
+  /* ---- Page surfaces ---------------------------------------------------- */
+  .mobile-navigation-shell .page-content { padding: 8px 8px 12px; }
+  .mobile-navigation-shell .page-content .v-table { font-size: 13px; }
+  .mobile-navigation-shell .v-list-item { min-height: 48px; }
+  .mobile-navigation-shell .v-list-item-title { font-size: 14px; }
+
+  .mobile-navigation-shell .page-content .v-btn {
+    height: auto;
+    min-height: 40px;
+  }
+  .mobile-navigation-shell .page-content .v-btn--icon { width: 40px; padding: 0; }
+
+  /* ---- Data tables ------------------------------------------------------ */
+  .mobile-navigation-shell .v-data-table-footer {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 8px 4px;
+  }
+  .mobile-navigation-shell .v-data-table-footer__items-per-page { font-size: 12px; }
+  .mobile-navigation-shell .v-data-table-footer__info { font-size: 12px; }
+  .mobile-navigation-shell .v-data-table-footer .v-select { max-width: 104px; }
+
+  /* ---- Dialogs ---------------------------------------------------------- */
+  .dashboard-form-dialog .v-overlay__content {
+    width: calc(100% - 16px) !important;
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 16px) !important;
+    margin: 8px !important;
+  }
+  .dashboard-form-dialog .v-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 16px);
+  }
+  .dashboard-form-dialog .v-card-title {
+    flex-shrink: 0;
+    min-width: 0;
+    padding: 14px 16px !important;
+    font-size: 18px !important;
+    line-height: 1.4;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .dashboard-form-dialog .v-card-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 12px 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .dashboard-form-dialog .v-card-actions {
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px !important;
+  }
+  .dashboard-form-dialog .v-card-actions .v-btn { min-height: 40px; }
+  .dashboard-form-dialog .v-alert {
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .dashboard-form-dialog .rule-editor-title {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dashboard-form-dialog .rule-editor-title > span { flex: 1; }
+  .dashboard-form-dialog .rule-editor-title > .v-chip {
+    order: 2;
+    flex: 1 0 100%;
+    height: auto;
+    padding-block: 4px;
+  }
+  .dashboard-form-dialog .rule-editor-title .v-chip__content {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .dashboard-form-dialog .rule-editor-card .v-card-text > div { padding: 12px 16px !important; }
+  .dashboard-form-dialog .rule-editor-card h3 { font-size: 14px; }
+
+  /* Keep every dialog's action row reachable while the keyboard is open. Bound
+     to the visual viewport, not 100dvh, because iOS does not shrink dvh for the
+     keyboard. */
+  .dashboard-form-dialog .v-overlay__content,
+  .dashboard-form-dialog .v-card {
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 16px) !important;
+  }
+}
+
+@media (max-width: 959.98px) {
+  /* Fixed/teleported surfaces do not share the normal page's padded shell.
+     Each surface owns one inset; its headers and footers use ordinary spacing. */
+  html[data-mobile-standalone='true'] .v-overlay.v-dialog {
+    box-sizing: border-box;
+    padding-block: var(--astrbot-safe-top) var(--astrbot-safe-bottom);
+  }
+  .v-dialog > .v-overlay__content {
+    margin: 8px !important;
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 16px) !important;
+  }
+  .v-dialog.v-dialog--fullscreen > .v-overlay__content {
+    margin: 0 !important;
+    height: var(--astrbot-overlay-height, 100dvh);
+    max-height: var(--astrbot-overlay-height, 100dvh) !important;
+  }
+  .chat-side-panel {
+    box-sizing: border-box;
+    padding-block: var(--astrbot-safe-top) var(--astrbot-safe-bottom);
+  }
+  html[data-mobile-keyboard='true'] .dashboard-form-dialog .v-overlay__content {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 12px) !important;
+  }
+
+  /* Menus, drawers and non-form dialogs are teleported overlays too. Cap them
+     to the visible area so the keyboard never hides the control being used. */
+  html[data-mobile-keyboard='true'] .v-overlay__content {
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 12px) !important;
+  }
+
+  /* Use the same canvas as the page, including iOS cover's full large viewport.
+     The owner already reduces that height to the visible area for the keyboard. */
+  html[data-mobile-standalone='true'] .v-overlay,
+  html[data-mobile-keyboard='true'] .v-overlay {
+    top: var(--astrbot-vv-offset-top, 0px);
+    bottom: auto;
+    height: var(--astrbot-viewport-height, 100dvh);
+  }
+}
+
+/* Dialogs are teleported outside .mobile-navigation-shell; give their action
+   rows the same touch height on phones. */
+@media (max-width: 600px) {
+  .v-overlay-container .v-card-actions .v-btn { min-height: 40px; }
+}
+
+/* ChatUI drops the bottom navigation and lives outside the shell class, so it
+   keeps its own touch scale: composer controls, header actions and the mobile
+   session drawer all use the same 40px target. */
+@media (max-width: 600px) {
+  .chat-main .v-btn,
+  .chat-sidebar .v-btn {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  .chat-main .v-btn--icon,
+  .chat-sidebar .v-btn--icon {
+    width: 40px;
+    min-width: 40px;
+  }
+  .top-header .header-menu-btn,
+  .top-header .header-actions .v-btn {
+    min-height: 40px;
+    min-width: 40px;
+  }
+  .v-application .top-header .header-menu-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .v-application .top-header .header-actions .v-btn {
+    height: 40px;
+  }
+}

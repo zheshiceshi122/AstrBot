@@ -3,7 +3,7 @@
     <div class="provider-models-toolbar">
       <div class="provider-models-title-wrap">
         <h3 class="provider-models-title">{{ tm('models.title') }}</h3>
-        <small class="provider-models-subtitle">{{ tm('models.available') }} {{ availableCount }}</small>
+        <small v-if="availableCount" class="provider-models-subtitle">{{ tm('models.available') }} {{ availableCount }}</small>
       </div>
 
       <div class="provider-models-toolbar__actions">
@@ -19,26 +19,6 @@
           :placeholder="tm('models.searchPlaceholder')"
         />
 
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-download"
-          :loading="loadingModels"
-          variant="tonal"
-          rounded="xl"
-          @click="emit('fetch-models')"
-        >
-          {{ isSourceModified ? tm('providerSources.saveAndFetchModels') : tm('providerSources.fetchModels') }}
-        </v-btn>
-
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-pencil-plus"
-          variant="text"
-          rounded="xl"
-          @click="emit('open-manual-model')"
-        >
-          {{ tm('models.manualAddButton') }}
-        </v-btn>
       </div>
     </div>
 
@@ -280,14 +260,6 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  loadingModels: {
-    type: Boolean,
-    default: false
-  },
-  isSourceModified: {
-    type: Boolean,
-    default: false
-  },
   supportsImageInput: {
     type: Function,
     required: true
@@ -324,8 +296,6 @@ const props = defineProps({
 
 const emit = defineEmits([
   'update:modelSearch',
-  'fetch-models',
-  'open-manual-model',
   'open-provider-edit',
   'toggle-provider-enable',
   'test-provider',

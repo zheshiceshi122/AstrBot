@@ -9,7 +9,7 @@
           <h3 class="text-h6 mb-4">{{ t('settings.basic') }}</h3>
 
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="6">
               <v-text-field
                 v-model.number="formData.chunk_size"
                 :label="t('settings.chunkSize')"
@@ -18,7 +18,7 @@
                 density="comfortable"
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="6">
               <v-text-field
                 v-model.number="formData.chunk_overlap"
                 :label="t('settings.chunkOverlap')"
@@ -33,7 +33,7 @@
           <h3 class="text-h6 mb-4 mt-6">{{ t('settings.retrieval') }}</h3>
 
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="6">
               <v-text-field
                 v-model.number="formData.top_k_dense"
                 :label="t('settings.topKDense')"
@@ -42,7 +42,7 @@
                 density="comfortable"
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="6">
               <v-text-field
                 v-model.number="formData.top_k_sparse"
                 :label="t('settings.topKSparse')"
@@ -66,7 +66,7 @@
           <h3 class="text-h6 mb-4 mt-6">{{ t('settings.embeddingProvider') }}</h3>
 
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="6">
               <v-select
                 v-model="formData.embedding_provider_id"
                 :items="embeddingProviders"
@@ -79,7 +79,7 @@
                 :disabled="true"
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="6">
               <v-select
                 v-model="formData.rerank_provider_id"
                 :items="rerankProviders"

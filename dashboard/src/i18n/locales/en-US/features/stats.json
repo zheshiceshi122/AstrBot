@@ -25,7 +25,7 @@
       "note": "Total accumulated messages"
     },
     "todayModelCalls": {
-      "label": "Today's Model Calls",
+      "label": "Today's tokens",
       "note": "Tokens"
     },
     "cpu": {

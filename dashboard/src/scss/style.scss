@@ -17,6 +17,156 @@
 
 @import './pages/dashboards';
 
-html, body {
+/* Shared warm-paper design tokens. Components should prefer these over
+   hard-coded neutral colors so light/dark and custom pages stay coherent. */
+:root {
+  --color-canvas: #f7f4ed;
+  --color-surface: #f0ebe1;
+  --color-surface-variant: #e6ded0;
+  --color-surface-raised: #ffffff;
+  --page-background: linear-gradient(135deg, #f7f4ed 0%, #ebe3d5 100%);
+
+  --color-ink: #3c332a;
+  --color-ink-soft: #7a6e61;
+
+  --color-accent: #b86b3b;
+  --color-accent-soft: rgba(184, 107, 59, 0.12);
+  --color-on-accent: #ffffff;
+
+  --color-danger: #b83b3b;
+  --color-success: #3b8b5a;
+  --color-warning: #b8860b;
+
+  --color-line: rgba(122, 110, 97, 0.15);
+  --color-line-strong: rgba(122, 110, 97, 0.3);
+
+  --glass-panel: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(240, 235, 225, 0.6));
+  --glass-panel-strong: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(245, 240, 232, 0.9));
+  --glass-border: rgba(184, 107, 59, 0.2);
+  --glass-shadow: 0 10px 25px rgba(60, 51, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+
+  --radius-panel: 16px;
+  --radius-control: 10px;
+  --overlay-background: rgba(60, 51, 42, 0.45);
+  --dialog-background: linear-gradient(145deg, #ffffff, #f0ebe1);
+}
+
+.v-theme--PurpleThemeDark {
+  --color-canvas: #1d1813;
+  --color-surface: #2a231d;
+  --color-surface-variant: #332a23;
+  --color-surface-raised: #332a23;
+  --page-background: linear-gradient(135deg, #1d1813 0%, #2a231d 100%);
+
+  --color-ink: #f2e9dd;
+  --color-ink-soft: #c9bcae;
+
+  --color-accent: #d08a5a;
+  --color-accent-soft: rgba(208, 138, 90, 0.16);
+  --color-on-accent: #1b1410;
+
+  --color-danger: #d66a6a;
+  --color-success: #6bbd86;
+  --color-warning: #d8ab45;
+
+  --color-line: rgba(242, 233, 221, 0.12);
+  --color-line-strong: rgba(242, 233, 221, 0.2);
+
+  --glass-panel: linear-gradient(145deg, rgba(42, 35, 29, 0.9), rgba(29, 24, 19, 0.82));
+  --glass-panel-strong: linear-gradient(145deg, rgba(51, 42, 35, 0.96), rgba(42, 35, 29, 0.94));
+  --glass-border: rgba(208, 138, 90, 0.24);
+  --glass-shadow: 0 10px 25px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  --overlay-background: rgba(10, 8, 6, 0.58);
+  --dialog-background: linear-gradient(145deg, #2a231d, #211b16);
+}
+
+html,
+body,
+#app {
+  height: var(--astrbot-viewport-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
   overscroll-behavior-y: none;
+}
+
+html,
+body {
+  background: var(--color-canvas);
+}
+
+:root {
+  --astrbot-viewport-height: 100dvh;
+  --astrbot-safe-top: 0px;
+  --astrbot-safe-bottom: 0px;
+  --astrbot-overlay-height: calc(var(--astrbot-viewport-height) - var(--astrbot-safe-top) - var(--astrbot-safe-bottom));
+}
+
+.v-application,
+.v-application__wrap {
+  height: var(--astrbot-viewport-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The shell owns safe-area spacing, except when bottom navigation paints its
+   own home-indicator area. Each edge is reserved exactly once. */
+html[data-mobile-standalone='true'] .v-application__wrap {
+  box-sizing: border-box;
+  padding-block: var(--astrbot-safe-top) var(--astrbot-safe-bottom);
+}
+
+html[data-mobile-standalone='true'] .mobile-bottom-navigation-present .v-application__wrap {
+  padding-bottom: 0;
+}
+
+/* Native chrome samples the actual outer canvas. Keep the padded wrapper
+   transparent so it cannot turn that sample into a second painted surface. */
+html[data-ios-status-synced],
+html[data-ios-status-synced] body {
+  background: var(--astrbot-status-color, var(--color-canvas));
+}
+
+html[data-ios-status-synced] .v-application__wrap {
+  background: transparent;
+}
+
+/* Hide the save bar only while the viewport confirms a software keyboard. */
+html[data-mobile-keyboard='true'] .config-actionbar {
+  display: none !important;
+}
+
+.v-application {
+  background: var(--page-background);
+  color: var(--color-ink);
+}
+
+/* Standalone chrome and page gaps share one full-height theme canvas. A
+   gradient on the page plus solid native bars cannot form a continuous edge. */
+html[data-mobile-standalone='true'] .v-application {
+  --page-background: var(--color-canvas);
+  --astrbot-chrome-bg: var(--color-canvas);
+}
+
+html[data-mobile-standalone='true'] .mobile-bottom-navigation {
+  background: transparent;
+}
+
+.v-overlay__scrim {
+  background: var(--overlay-background) !important;
+  opacity: 1 !important;
+}
+
+.v-dialog > .v-overlay__content > .v-card {
+  background: var(--dialog-background);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  box-shadow: 0 24px 60px rgba(60, 51, 42, 0.2);
+}
+
+/* Filled fields need to sit one step above the card, especially in dark mode
+   where surface and surface-variant are close in luminance. */
+.v-field--variant-solo-filled,
+.v-field--variant-solo {
+  background-color: var(--color-surface-raised) !important;
 }

@@ -31,7 +31,7 @@ const getTypeInfo = (type: string): TypeInfo => {
 </script>
 
 <template>
-  <v-dialog :model-value="show" @update:model-value="emit('update:show', $event)" max-width="500">
+  <v-dialog class="dashboard-form-dialog" :model-value="show" @update:model-value="emit('update:show', $event)" max-width="500">
     <v-card v-if="command">
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ tm('dialogs.details.title') }}</v-card-title>
       <v-card-text>

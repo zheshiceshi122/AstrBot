@@ -118,6 +118,8 @@
       "umo": "UMO",
       "umoPlaceholder": "输入完整或部分 UMO",
       "sort": "排序",
+      "more": "更多筛选",
+      "less": "收起更多筛选",
       "reset": "清除筛选",
       "close": "关闭筛选",
       "done": "完成",

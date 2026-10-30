@@ -640,9 +640,17 @@ const openView = () => {
   }
 
   .extension-logo {
-    width: 52px;
-    height: 52px;
+    width: 36px;
+    height: 36px;
   }
+  .extension-card-text { padding: 10px 12px 6px; }
+  .extension-title-row { flex-wrap: wrap; align-items: flex-start; gap: 4px; }
+  .extension-title { flex-wrap: wrap; gap: 4px; }
+  .extension-title__text { flex: 1 0 100%; white-space: normal; overflow-wrap: anywhere; font-size: 14px; }
+  .extension-version { margin-left: 0; font-size: 12px; }
+  .extension-title :deep(.v-chip) { flex-shrink: 0; margin-left: 0 !important; }
+  .extension-desc { font-size: 13px; margin-top: 4px; }
+  .extension-actions { padding: 0 8px 6px; gap: 2px; flex-wrap: wrap; }
 }
 
 .extension-actions {

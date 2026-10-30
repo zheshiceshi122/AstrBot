@@ -22,7 +22,7 @@
             class="stat-card overview-card"
           >
             <div class="card-icon">
-              <v-icon size="88">{{ card.icon }}</v-icon>
+              <v-icon :size="xs ? 24 : 88">{{ card.icon }}</v-icon>
             </div>
             <div class="card-label">{{ card.label }}</div>
             <div class="card-value">{{ card.value }}</div>
@@ -62,7 +62,7 @@
             </div>
             <VueApexCharts
               type="area"
-              height="320"
+              :height="xs ? 220 : 320"
               :options="messageChartOptions"
               :series="messageChartSeries"
             />
@@ -112,7 +112,7 @@
             </div>
             <VueApexCharts
               type="bar"
-              height="420"
+              :height="xs ? 260 : 420"
               :options="providerChartOptions"
               :series="providerTrendSeries"
             />
@@ -257,7 +257,7 @@ import type { ApexOptions } from 'apexcharts'
 import { Check, Copy, MessageCircle, MessageSquareText } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { useTheme } from 'vuetify'
+import { useDisplay, useTheme } from 'vuetify'
 import { statsApi } from '@/api/v1'
 import { useI18n, useModuleI18n } from '@/i18n/composables'
 import { copyToClipboard } from '@/utils/clipboard'
@@ -334,6 +334,7 @@ interface ProviderTokenStatsResponse {
 const { locale, t: globalT } = useI18n()
 const { tm: t } = useModuleI18n('features/stats')
 const theme = useTheme()
+const { xs } = useDisplay()
 const loading = ref(true)
 const errorMessage = ref('')
 const baseStats = ref<BaseStatsResponse | null>(null)
@@ -492,7 +493,7 @@ const uptimeLabel = computed(() => {
   const startTime = baseStats.value?.start_time
   if (!startTime) return '—'
 
-  const elapsedSeconds = Math.max(0, Math.floor(currentTimeMs.value / 1000) - startTime)
+  const elapsedSeconds = Math.max(0, Math.floor(currentTimeMs.value / 1000 - startTime))
   return formatRunningTime({
     hours: Math.floor(elapsedSeconds / 3600),
     minutes: Math.floor((elapsedSeconds % 3600) / 60),
@@ -590,16 +591,16 @@ const platformRanking = computed(() =>
 )
 
 const providerChartColors = [
-  '#008FFB',
-  '#00C49F',
-  '#FEB019',
-  '#FF6B45',
-  '#775DD0',
-  '#8BC34A',
-  '#D65AD1',
-  '#2ED5C4',
-  '#FF5CA8',
-  '#2E7D32'
+  '#b86b3b',
+  '#d9a066',
+  '#b8860b',
+  '#7a6e61',
+  '#6f7f86',
+  '#3b8b5a',
+  '#9a542c',
+  '#c9a27e',
+  '#8c735b',
+  '#5f564c'
 ]
 
 const messageChartOptions = computed<ApexOptions>(() => ({
@@ -740,25 +741,25 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .stats-page {
-  --stats-bg: rgb(var(--v-theme-background));
+  --stats-bg: transparent;
   --stats-surface: rgb(var(--v-theme-surface));
-  --stats-card: #f5f6f7;
+  --stats-card: var(--color-surface);
   --stats-text: rgb(var(--v-theme-on-surface));
   --stats-muted: rgba(var(--v-theme-on-surface), 0.68);
   --stats-subtle: rgba(var(--v-theme-on-surface), 0.56);
-  --stats-border: rgba(var(--v-theme-on-surface), 0.1);
-  --stats-border-strong: rgba(var(--v-theme-on-surface), 0.14);
-  --stats-soft: rgba(var(--v-theme-primary), 0.08);
-  --stats-soft-strong: rgba(var(--v-theme-primary), 0.14);
+  --stats-border: var(--color-line);
+  --stats-border-strong: var(--color-line-strong);
+  --stats-soft: var(--color-accent-soft);
+  --stats-soft-strong: rgba(var(--v-theme-primary), 0.16);
   min-height: 100%;
   background: var(--stats-bg);
 }
 
 .stats-page.is-dark {
-  --stats-card: rgba(var(--v-theme-on-surface), 0.06);
-  --stats-border: rgba(var(--v-theme-on-surface), 0.14);
-  --stats-border-strong: rgba(var(--v-theme-on-surface), 0.18);
-  --stats-soft: rgba(var(--v-theme-primary), 0.12);
+  --stats-card: var(--color-surface);
+  --stats-border: var(--color-line);
+  --stats-border-strong: var(--color-line-strong);
+  --stats-soft: var(--color-accent-soft);
   --stats-soft-strong: rgba(var(--v-theme-primary), 0.2);
 }
 
@@ -1237,20 +1238,42 @@ onBeforeUnmount(() => {
 
 @media (max-width: 640px) {
   .overview-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
   }
 
   .stats-shell {
+    padding-top: 4px !important;
     padding-left: 4px !important;
     padding-right: 4px !important;
+    padding-bottom: 20px !important;
   }
 
   .chart-card,
   .system-card,
   .provider-list-card,
   .token-total-card {
-    padding: 18px;
-    border-radius: 14px;
+    padding: 12px;
+    border-radius: 10px;
   }
+  .overview-card { min-width: 0; padding: 10px 12px; border-radius: 10px; }
+  .overview-card .card-label { padding-right: 18px; font-size: 12px; line-height: 1.4; }
+  .card-value { margin-top: 4px; font-size: 22px; line-height: 1.2; overflow-wrap: anywhere; }
+  .card-icon { top: 9px; right: 8px; bottom: auto; width: 24px; height: 24px; opacity: .22; }
+  .panel-grid, .token-grid, .token-side-column { gap: 10px; margin-bottom: 12px; }
+  .token-side-column { display: contents; }
+  .provider-trend-card { min-height: 0; }
+  .token-total-card { grid-row: 1; }
+  .token-meta-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; }
+  .token-meta-item { min-width: 0; flex-wrap: wrap; padding: 6px 0; gap: 4px; }
+  .token-total-value { font-size: 26px; }
+  .section-toolbar { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .section-title { font-size: 15px; }
+  .range-switch { gap: 0; padding: 3px; border-radius: 999px; }
+  .range-chip { min-height: 40px; padding: 8px 14px; border-radius: 999px; font-size: 13px; }
+  .card-head { flex-direction: row; gap: 8px; margin-bottom: 8px; }
+  .metric-value { font-size: 18px; }
+  .token-section-head { margin-bottom: 10px; }
 }
 </style>

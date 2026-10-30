@@ -9,6 +9,7 @@ import {
   Hash,
   Heart,
   LoaderCircle,
+  ListFilter,
   Pause,
   Play,
   PlugZap,
@@ -911,18 +912,20 @@ onBeforeUnmount(() => {
 
 <template>
   <v-defaults-provider :defaults="{ VSelect: { menuProps: { contentClass: 'trace-menu' } } }">
-  <div class="trace-explorer">
+  <div class="trace-explorer" :class="{ 'is-empty': totalRecords === 0 }">
     <div class="trace-explorer-toolbar">
       <v-btn
         class="filter-toggle-btn"
         size="small"
         variant="tonal"
         :aria-expanded="filtersOpen"
+        :aria-label="tm('filters.button')"
+        :title="tm('filters.button')"
         aria-controls="trace-filter-panel"
         @click="filtersOpen = !filtersOpen"
       >
-        <v-icon icon="mdi-filter-variant" size="17" />
-        <span>{{ tm("filters.button") }}</span>
+        <ListFilter :size="19" aria-hidden="true" />
+        <span class="toolbar-button-label">{{ tm("filters.button") }}</span>
         <span v-if="selectedFilters.length" class="filter-status-dot" aria-hidden="true" />
       </v-btn>
       <div class="trace-search">
@@ -944,7 +947,7 @@ onBeforeUnmount(() => {
         @click="emit('toggle-recording')"
       >
         <component :is="!recordingEnabled ? Play : connected ? Pause : LoaderCircle" :size="16" :class="{ 'trace-connecting-icon': recordingEnabled && !connected }" aria-hidden="true" />
-        {{ recordingLabel }}
+        <span class="toolbar-button-label">{{ recordingLabel }}</span>
       </v-btn>
       <v-btn
         class="refresh-button"
@@ -957,7 +960,7 @@ onBeforeUnmount(() => {
         @click="fetchTraceHistory(true, true, true)"
       >
         <RefreshCw :size="16" aria-hidden="true" />
-        <span>{{ tm("refresh") }}</span>
+        <span class="toolbar-button-label">{{ tm("refresh") }}</span>
       </v-btn>
     </div>
 
@@ -985,7 +988,7 @@ onBeforeUnmount(() => {
         <v-data-table-server
           v-else
           class="trace-list-table"
-          :headers="traceHeaders"
+          :headers="$vuetify.display.xs ? [{ title: tm('columns.message'), key: 'mobile' }] : traceHeaders"
           :items="traceRows"
           item-value="event.span_id"
           :page="historyPage"
@@ -1033,6 +1036,25 @@ onBeforeUnmount(() => {
           disable-sort
         >
           <template #header.spans><span :title="tm('columns.spansHint')">Spans</span></template>
+          <template #item.mobile="{ item }">
+            <div class="mobile-trace-row">
+              <div class="mobile-trace-meta">
+                <v-chip size="x-small" variant="tonal" :color="item.event.status === 'error' ? 'error' : item.event.status === 'success' ? 'success' : 'primary'">{{ statusLabel(item.event) }}</v-chip>
+                <time>{{ formatTime(item.event.first_time) }}</time>
+                <span>{{ item.duration }}</span><span>Spans {{ item.spans }}</span>
+              </div>
+              <strong>{{ item.event.message_outline || tm('untitled') }}</strong>
+              <div class="mobile-trace-meta">
+                <span>{{ item.event.platform_id || item.event.platform_name || '-' }}</span>
+                <span v-if="matchesFilter(item.event, 'models')">{{ tm('classification.agent') }}</span>
+                <span v-if="item.event.has_commands ?? item.event.records.some(record => record.kind === 'plugin_handler' && record.fields.handler_category === 'command')">{{ tm('classification.command') }}</span>
+                <span v-if="item.event.message_type === 'GroupMessage'">{{ tm('classification.group') }}</span>
+                <span v-else-if="item.event.message_type === 'FriendMessage'">{{ tm('classification.private') }}</span>
+                <span>{{ tm('columns.sender') }}: {{ item.event.sender_name || '-' }}</span>
+              </div>
+              <div class="mobile-trace-meta mobile-trace-session"><span v-if="umoNames[item.event.umo] && umoNames[item.event.umo] !== item.event.umo">{{ umoNames[item.event.umo] }}</span><span>UMO: {{ item.event.umo || '-' }}</span></div>
+            </div>
+          </template>
           <template #item.status="{ item: { event } }">
             <v-chip size="small" variant="flat" :color="event.status === 'error' ? 'error' : event.status === 'success' ? 'success' : '#1976D2'">{{ statusLabel(event) }}</v-chip>
           </template>
@@ -1332,5 +1354,22 @@ onBeforeUnmount(() => {
 .trace-empty-state { align-items: center; color: var(--trace-muted); display: flex; flex-direction: column; font-size: 12px; gap: 8px; justify-content: center; min-height: 180px; }
 @media (max-width: 1100px) { .trace-detail { border-left: 1px solid var(--trace-border); bottom: 0; box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12); max-width: none; min-width: 0; position: absolute; right: 0; top: 0; width: min(760px, 90%); z-index: 1; } }
 @media (max-width: 900px) { .trace-filter-panel { bottom: 0; box-shadow: 8px 0 24px rgba(0, 0, 0, 0.18); left: 0; max-width: 85%; position: absolute; top: 0; width: 220px; z-index: 3; } .trace-filter-backdrop { background: rgba(var(--v-theme-on-surface), 0.12); border: 0; display: block; inset: 0; position: absolute; z-index: 2; } .trace-detail { padding: 15px; } .trace-stat-grid, .trace-stat-grid.has-tokens { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .trace-explorer-toolbar { flex-wrap: wrap; } .filter-toggle-btn { order: 1; } .trace-search { flex: 1 1 160px; max-width: none; order: 1; } .trace-recording-btn { order: 2; } .refresh-button { margin-left: auto; order: 2; } .trace-detail { width: 100%; } .trace-detail-time { display: none; } }
+@media (max-width: 640px) {
+  .trace-explorer-toolbar { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px 40px; gap: 4px; padding: 4px; }
+  .trace-explorer-toolbar :deep(.v-btn) { min-width: 40px; width: 40px; height: 40px; padding: 0; }
+  /* No records means no pagination worth the screen space. */
+  .trace-explorer.is-empty :deep(.v-data-table-footer) { display: none; }
+  .trace-explorer-toolbar .toolbar-button-label { display: none; }
+  .trace-search { width: 100%; min-width: 0; max-width: none; }
+  .trace-detail { width: 100%; }
+  .trace-detail-time { display: none; }
+}
+@media (max-width: 600px) {
+  .mobile-trace-row { display: grid; gap: 5px; padding-block: 6px; font-size: 13px; overflow-wrap: anywhere; }
+  .mobile-trace-row strong { font-weight: 600; line-height: 1.5; }
+  .mobile-trace-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: var(--trace-muted); font-size: 12px; }
+  .trace-search { height: 36px; }
+  .trace-search input { font-size: 16px; }
+  .icon-button { min-width: 40px; min-height: 40px; }
+}
 </style>

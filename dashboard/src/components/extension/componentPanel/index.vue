@@ -140,11 +140,9 @@ watch(viewMode, async (mode) => {
 </script>
 
 <template>
-  <v-row>
-    <v-col cols="12">
-      <v-card variant="flat" style="background-color: transparent">
-        <v-card-text style="padding: 20px 12px; padding-top: 0px;">
-          <div class="d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
+  <v-card class="component-panel" variant="flat" style="background-color: transparent">
+        <v-card-text class="component-panel-content" style="padding: 20px 12px; padding-top: 0px;">
+          <div class="component-mode-toolbar d-flex justify-space-between align-center mb-6 flex-wrap ga-3">
             <v-btn-toggle v-model="viewMode" color="primary" variant="outlined" density="comfortable" mandatory>
               <v-btn value="commands">
                 <v-icon size="18" class="mr-1">mdi-console-line</v-icon>
@@ -289,9 +287,7 @@ watch(viewMode, async (mode) => {
             />
           </div>
         </v-card-text>
-      </v-card>
-    </v-col>
-  </v-row>
+  </v-card>
 
   <!-- 重命名对话框 -->
   <RenameDialog
@@ -326,5 +322,9 @@ watch(viewMode, async (mode) => {
 
 .builtin-tools-checkbox :deep(.v-selection-control) {
   min-height: auto;
+}
+@media (max-width: 600px) {
+  .component-panel-content { padding: 0 !important; }
+  .component-mode-toolbar { margin-bottom: 10px !important; }
 }
 </style>

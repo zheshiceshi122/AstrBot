@@ -17,13 +17,13 @@ AstrBot 支持接入 NewAPI 作为模型提供商，用户可以通过 NewAPI �
 ![copy-api-key](https://files.astrbot.app/docs/source/images/newapi/image-1.png)
 ### 在 AstrBot 中配置 NewAPI 服务提供商
 
-打开 AstrBot 管理面板，进入「模型提供商」→「对话」，点击「新增」。
+打开 AstrBot 管理面板，进入「设置」→「模型与 API」→「对话」，点击「新增」。
 
 NewAPI 完美地支持了 OpenAI Chat Completion 和 Responses 接口，选择 `OpenAI Compatible`（Chat Completion）或 `OpenAI Responses`，进入相应的提供商设置。
 
 在弹出的对话框中，将 API Base URL 设置为 NewAPI 的接口地址。如果您本地部署了 NewAPI，则填写本地地址，例如 `http://localhost:3000/v1`，如果您使用第三方服务商提供的 NewAPI 服务，则填写相应的 URL 地址，例如 `https://api.example.com/v1`。
 
-填写提供商名称和 `API Key`，确认 `API Base URL`，点击「保存并获取模型」。在模型列表中点击所需模型右侧的 `+`，确认模型已启用；也可先「保存配置」，再通过「自定义模型」填写准确的模型 ID。点击已配置模型旁的「测试模型」按钮可检查是否可用。
+填写名称、API Key 和 Base URL，在同页「模型」中直接输入模型 ID，或点击模型附近的「获取模型列表 / 保存并获取模型」按钮获取列表。选择「用于聊天的配置文件」，点击「保存并使用」即可完成连接、模型添加和应用；保留「仅保存模型，暂不切换」则只保存连接和模型。保存后可在下方已配置模型列表中测试连通性或编辑模型参数。详细操作见 [接入模型服务](./start.md)。
 
 ### 应用服务提供商
 

@@ -295,4 +295,9 @@ watch(
     font-size: 1.25rem;
   }
 }
+@media (max-width: 600px) {
+  .kb-detail-page :deep(.v-tab) { min-width: 0; padding-inline: 8px; font-size: 13px; }
+  .kb-detail-page :deep(.v-tab .v-icon) { display: none; }
+  .kb-detail-page > .kb-content > .v-tabs { margin-bottom: 10px !important; } .kb-detail-page :deep(.stat-box) { padding: 10px; } .kb-detail-page :deep(.stat-value) { font-size: 22px; margin-top: 4px; } .kb-detail-page :deep(.v-card-title) { font-size: 16px; white-space: normal; padding: 12px; } .kb-detail-page :deep(.v-card-text) { padding: 12px; }
+}
 </style>

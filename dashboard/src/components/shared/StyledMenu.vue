@@ -35,10 +35,9 @@ withDefaults(defineProps<{
 .styled-menu-card {
   min-width: 100px;
   width: fit-content;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.09) !important;
-  background: rgba(var(--v-theme-surface), 0.98) !important;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07) !important;
+  border: 1px solid var(--color-line) !important;
+  background: var(--color-surface-raised) !important;
+  box-shadow: var(--glass-shadow) !important;
 }
 
 .v-overlay.v-menu .v-overlay__content > .styled-menu-card:not(.styled-menu-card-borderless) {

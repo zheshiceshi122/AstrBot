@@ -52,6 +52,7 @@ export default defineConfig({
               { text: "宝塔面板部署", link: "/astrbot/btpanel" },
               { text: "1Panel 部署", link: "/astrbot/1panel" },
               { text: "源码部署", link: "/astrbot/cli" },
+              { text: "Android Termux 部署", link: "/astrbot/termux" },
               {
                 text: "其他部署方式",
                 link: "/astrbot/other-deployments",
@@ -329,6 +330,7 @@ export default defineConfig({
               { text: "BT Panel", link: "/astrbot/btpanel" },
               { text: "1Panel", link: "/astrbot/1panel" },
               { text: "Source Deployment", link: "/astrbot/cli" },
+              { text: "Android Termux", link: "/astrbot/termux" },
               {
                 text: "Other Deployments",
                 link: "/astrbot/other-deployments",

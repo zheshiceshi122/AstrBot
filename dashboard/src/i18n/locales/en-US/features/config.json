@@ -9,6 +9,8 @@
     "applyTip": "`Apply This Configuration` will stage and apply the configuration to the visual editor. To save, you need to click the save button in the bottom right corner."
   },
   "actions": {
+    "more": "More actions",
+    "test": "Test chat",
     "save": "Save Configuration",
     "delete": "Delete This Item",
     "add": "Add",
@@ -28,7 +30,7 @@
   "messages": {
     "configApplied": "Configuration successfully applied. To save, you need to click the save button in the bottom right corner.",
     "configApplyError": "Configuration not applied, JSON format error.",
-    "unsavedChangesNotice": "Unsaved. Click the button in the bottom-right corner to save.",
+    "unsavedChangesNotice": "Unsaved",
     "saveSuccess": "Configuration saved successfully",
     "saveError": "Failed to save configuration",
     "loadError": "Failed to load configuration",
@@ -53,6 +55,7 @@
     "localSettingsTitle": "AstrBot Built-in AI",
     "settingsSuffix": "Settings",
     "tabs": {
+      "common": "Common",
       "model": "Model",
       "persona": "Persona",
       "capabilities": "Capabilities",
@@ -70,6 +73,7 @@
     },
     "common": {
       "title": "Common Settings",
+      "scope": "All modes",
       "subtitle": "These settings remain unchanged when the execution mode changes."
     },
     "disabled": {

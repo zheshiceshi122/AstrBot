@@ -1,8 +1,9 @@
 <template>
   <v-dialog
     v-model="showDialog"
+    class="dashboard-form-dialog platform-setup-dialog"
     max-width="800px"
-    max-height="90%"
+    scrollable
     @after-enter="prepareData"
   >
     <v-card>
@@ -17,14 +18,14 @@
       </v-card-title>
       <v-card-text
         ref="dialogScrollContainer"
-        class="pa-4 ml-2"
+        class="platform-setup-body"
         style="overflow-y: auto"
       >
-        <div class="d-flex align-start" style="width: 100%">
-          <div>
+        <div class="platform-setup-step">
+          <div class="platform-step-number">
             <v-icon icon="mdi-numeric-1-circle" class="mr-3"></v-icon>
           </div>
-          <div style="flex: 1">
+          <div class="platform-step-content config-form">
             <h3>
               {{ tm("createDialog.step1Title") }}
             </h3>
@@ -41,10 +42,9 @@
                   :label="tm('createDialog.platformTypeLabel')"
                   variant="outlined"
                   rounded="md"
-                  dense
+                  density="compact"
                   hide-details
-                  class="mt-6"
-                  style="max-width: 30%; min-width: 300px"
+                  class="platform-type-field mt-4"
                 >
                   <template v-slot:item="{ props: itemProps, item }">
                     <v-list-item v-bind="itemProps">
@@ -328,10 +328,9 @@
                   :label="tm('createDialog.platformTypeLabel')"
                   variant="outlined"
                   rounded="md"
-                  dense
+                  density="compact"
                   hide-details
-                  class="mt-6"
-                  style="max-width: 30%; min-width: 300px"
+                  class="platform-type-field mt-4"
                   v-model="updatingPlatformConfig.type"
                   disabled
                 ></v-text-field>
@@ -349,12 +348,12 @@
           </div>
         </div>
 
-        <div class="d-flex align-start mt-6">
-          <div>
+        <div class="platform-setup-step mt-4">
+          <div class="platform-step-number">
             <v-icon icon="mdi-numeric-2-circle" class="mr-3"></v-icon>
           </div>
-          <div style="flex: 1">
-            <div class="d-flex align-center justify-space-between">
+          <div class="platform-step-content">
+            <div class="platform-config-heading d-flex align-center justify-space-between">
               <div>
                 <div class="d-flex align-center">
                   <h3>
@@ -382,6 +381,8 @@
                   variant="text"
                   icon
                   @click="toggleConfigSection"
+                  :aria-label="tm('createDialog.configFileTitle')"
+                  :aria-expanded="showConfigSection"
                   class="mt-2"
                 >
                   <v-icon>{{
@@ -404,7 +405,7 @@
                     </template>
                   </v-radio>
                   <div
-                    class="d-flex align-center ml-10 my-2"
+                    class="platform-config-choice d-flex align-center my-2"
                     v-if="aBConfigRadioVal === '0'"
                   >
                     <v-select
@@ -415,9 +416,9 @@
                       :label="tm('createDialog.selectConfigLabel')"
                       variant="outlined"
                       rounded="md"
-                      dense
+                      density="compact"
                       hide-details
-                      style="max-width: 30%; min-width: 200px"
+                      class="platform-config-field"
                     >
                     </v-select>
                     <v-btn
@@ -426,6 +427,7 @@
                       density="comfortable"
                       class="ml-2"
                       :disabled="!selectedAbConfId"
+                      :aria-label="tm('createDialog.configDrawerTitle')"
                       @click="openConfigDrawer(selectedAbConfId)"
                     >
                       <v-icon>mdi-arrow-top-right-thick</v-icon>
@@ -437,7 +439,7 @@
                   >
                   </v-radio>
                   <div
-                    class="d-flex align-center"
+                    class="platform-config-choice d-flex align-center"
                     v-if="aBConfigRadioVal === '1'"
                   >
                     <v-text-field
@@ -445,10 +447,9 @@
                       :label="tm('createDialog.newConfigNameLabel')"
                       variant="outlined"
                       rounded="md"
-                      dense
+                      density="compact"
                       hide-details
-                      style="max-width: 30%; min-width: 200px"
-                      class="ml-10 my-2"
+                      class="platform-config-field my-2"
                     >
                     </v-text-field>
                   </div>
@@ -713,7 +714,7 @@
   </v-dialog>
 
   <!-- ID冲突确认对话框 -->
-  <v-dialog v-model="showIdConflictDialog" max-width="450" persistent>
+  <v-dialog class="dashboard-form-dialog" v-model="showIdConflictDialog" max-width="450" persistent scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon start class="me-2">mdi-alert-circle-outline</v-icon>
@@ -735,7 +736,7 @@
   </v-dialog>
 
   <!-- 安全警告对话框 -->
-  <v-dialog v-model="showOneBotEmptyTokenWarnDialog" max-width="600" persistent>
+  <v-dialog class="dashboard-form-dialog" v-model="showOneBotEmptyTokenWarnDialog" max-width="600" persistent scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ tm("dialog.securityWarning.title") }}
@@ -1798,9 +1799,33 @@ export default {
 };
 </script>
 
-<style>
-.v-select__selection-text {
-  font-size: 12px;
+<style scoped src="@/styles/config-form.css"></style>
+<style scoped>
+.platform-setup-step {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.platform-step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.platform-type-field {
+  width: 100%;
+  max-width: 360px;
+}
+
+.platform-config-choice {
+  gap: 4px;
+  margin-left: 40px;
+}
+
+.platform-config-field {
+  flex: 1;
+  min-width: 0;
+  max-width: 360px;
 }
 
 .platform-action-row {
@@ -1833,7 +1858,7 @@ export default {
 }
 
 .route-source-mode-link {
-  color: #0000ee;
+  color: rgb(var(--v-theme-primary));
   cursor: pointer;
   font-size: 12px;
   line-height: 1;
@@ -1851,11 +1876,50 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
+  min-width: 0;
   gap: 8px;
 }
 
 .registration-platform-id-field {
-  width: 300px;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .platform-setup-body {
+    padding: 12px 16px !important;
+  }
+
+  .platform-setup-step {
+    display: block;
+    position: relative;
+  }
+
+  .platform-step-number {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .platform-step-content > h3,
+  .platform-config-heading {
+    padding-left: 30px;
+  }
+
+  .platform-step-content h3 {
+    font-size: 14px;
+    line-height: 24px;
+  }
+
+  .platform-step-content > small {
+    display: block;
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+
+  .platform-config-choice {
+    margin-left: 0;
+  }
 }
 </style>

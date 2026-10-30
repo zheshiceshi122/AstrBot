@@ -1,4 +1,4 @@
-/* Auto-generated MDI subset – 267 icons */
+/* Auto-generated MDI subset – 257 icons */
 /* Do not edit manually. Run: pnpm run subset-icons */
 
 @font-face {
@@ -162,10 +162,6 @@
 
 .mdi-chat-outline::before {
   content: "\F0EDE";
-}
-
-.mdi-chat-processing::before {
-  content: "\F0B7B";
 }
 
 .mdi-chat-remove::before {
@@ -480,10 +476,6 @@
   content: "\F0234";
 }
 
-.mdi-filter-variant::before {
-  content: "\F0236";
-}
-
 .mdi-folder-move::before {
   content: "\F0252";
 }
@@ -520,20 +512,12 @@
   content: "\F0293";
 }
 
-.mdi-fullscreen-exit::before {
-  content: "\F0294";
-}
-
 .mdi-function-variant::before {
   content: "\F0871";
 }
 
 .mdi-github::before {
   content: "\F02A4";
-}
-
-.mdi-hand-heart::before {
-  content: "\F10F1";
 }
 
 .mdi-help-circle-outline::before {
@@ -614,10 +598,6 @@
 
 .mdi-lightning-bolt::before {
   content: "\F140B";
-}
-
-.mdi-lightning-bolt-outline::before {
-  content: "\F140C";
 }
 
 .mdi-link::before {
@@ -784,10 +764,6 @@
   content: "\F0CB6";
 }
 
-.mdi-pencil-plus::before {
-  content: "\F0DEB";
-}
-
 .mdi-pin::before {
   content: "\F0403";
 }
@@ -818,10 +794,6 @@
 
 .mdi-progress-download::before {
   content: "\F0997";
-}
-
-.mdi-puzzle::before {
-  content: "\F0431";
 }
 
 .mdi-puzzle-outline::before {
@@ -894,10 +866,6 @@
 
 .mdi-send-outline::before {
   content: "\F1165";
-}
-
-.mdi-server-network::before {
-  content: "\F048D";
 }
 
 .mdi-server-off::before {
@@ -1046,14 +1014,6 @@
 
 .mdi-vector-point::before {
   content: "\F01C4";
-}
-
-.mdi-view-grid::before {
-  content: "\F0570";
-}
-
-.mdi-view-grid-outline::before {
-  content: "\F11D9";
 }
 
 .mdi-volume-high::before {

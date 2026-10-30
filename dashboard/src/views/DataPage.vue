@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { computed, watch } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 import {
@@ -55,7 +56,7 @@ watch(
 
 <template>
   <div class="data-workspace">
-    <div class="data-tabs-scroll">
+    <PageToolbar class="data-tabs-scroll">
       <nav
         class="data-tabs"
         role="tablist"
@@ -86,19 +87,25 @@ watch(
           </a>
         </RouterLink>
       </nav>
-    </div>
+    </PageToolbar>
 
-    <RouterView />
+    <div class="data-page-content"><RouterView /></div>
   </div>
 </template>
 
 <style scoped>
 .data-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   min-width: 0;
   width: 100%;
 }
 
 .data-tabs-scroll {
+  flex: 0 0 auto;
   overflow-x: auto;
   padding: 4px 12px 8px;
   scrollbar-width: none;
@@ -109,10 +116,13 @@ watch(
 }
 
 .data-tabs {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
   align-items: center;
   display: inline-flex;
   gap: 2px;
-  min-width: max-content;
+  min-width: 0;
 }
 
 .data-tab {
@@ -129,18 +139,18 @@ watch(
 }
 
 .data-tab:hover {
-  background: rgba(var(--v-theme-on-surface), 0.045);
-  color: rgba(var(--v-theme-on-surface), 0.78);
+  background: rgba(var(--v-theme-primary), 0.06);
+  color: rgb(var(--v-theme-primary));
 }
 
 .data-tab--active {
-  background: rgba(var(--v-theme-on-surface), 0.065);
-  color: rgba(var(--v-theme-on-surface), 0.86);
+  background: var(--color-accent-soft);
+  color: rgb(var(--v-theme-primary));
 }
 
 .data-tab--active:hover {
-  background: rgba(var(--v-theme-on-surface), 0.09);
-  color: rgba(var(--v-theme-on-surface), 0.9);
+  background: rgba(var(--v-theme-primary), 0.18);
+  color: rgb(var(--v-theme-primary));
 }
 
 @media (max-width: 600px) {
@@ -149,7 +159,15 @@ watch(
   }
 
   .data-tab {
-    padding-inline: 11px;
+    height: 40px;
+    padding-inline: 6px;
+    flex-shrink: 0;
+    font-size: 12px;
+    gap: 4px;
   }
 }
+.data-page-content { flex: 1; min-height: 0; overflow-y: auto; }
+.data-page-content > :deep(.console-page),
+.data-page-content > :deep(.trace-page),
+.data-page-content > :deep(.conversation-workspace) { height: 100%; min-height: 0; }
 </style>

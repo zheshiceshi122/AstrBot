@@ -25,7 +25,7 @@
       "note": "累計メッセージ数"
     },
     "todayModelCalls": {
-      "label": "本日のモデル呼び出し",
+      "label": "本日のトークン",
       "note": "トークン"
     },
     "cpu": {

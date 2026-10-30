@@ -771,7 +771,7 @@ function closeImage() {
 
 .preview-image {
   max-width: min(92vw, 1000px);
-  max-height: 88vh;
+  max-height: calc(var(--astrbot-viewport-height, 100dvh) * 0.88);
   border-radius: 8px;
   object-fit: contain;
 }

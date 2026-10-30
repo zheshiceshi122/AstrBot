@@ -2,6 +2,7 @@
   <div class="provider-chat-panel">
     <div
       class="provider-workbench"
+      :inert="connection.busy || savingSource || loadingModels || undefined"
       :class="{ 'provider-workbench--borderless': !props.showBorder }"
     >
       <div class="provider-workbench__sidebar">
@@ -23,46 +24,25 @@
 
       <div class="provider-workbench__main">
         <div v-if="selectedProviderSource" class="provider-config-shell">
-          <div class="provider-config-header">
-            <div class="provider-config-headline">
-              <div class="provider-config-title">{{ getSourceDisplayName(selectedProviderSource) }}</div>
-              <ProviderSourceSubtitle
-                class="provider-config-subtitle"
-                :api-base="selectedProviderSource.api_base"
-                :sponsor="selectedSponsor"
-                :tm="tm"
-              />
-            </div>
-
-            <div class="provider-config-actions">
-              <v-btn
-                color="primary"
-                prepend-icon="mdi-content-save-outline"
-                :loading="savingSource"
-                :disabled="!isSourceModified"
-                variant="tonal"
-                rounded="xl"
-                @click="saveProviderSource"
-              >
-                {{ tm('providerSources.save') }}
-              </v-btn>
-            </div>
+          <div v-if="selectedSponsor" class="provider-config-header">
+            <ProviderSourceSubtitle :api-base="selectedProviderSource.api_base" :sponsor="selectedSponsor" :tm="tm" />
           </div>
 
-          <v-divider></v-divider>
-
           <div class="provider-config-body">
-            <section class="provider-section config-form">
-              <div class="provider-section-head">
-                <div class="provider-section-title">{{ tm('providers.settings') }}</div>
-              </div>
-              <AstrBotConfig
-                v-if="basicSourceConfig"
-                :iterable="basicSourceConfig"
-                :metadata="providerSourceSchema"
-                :field-links="providerSourceFieldLinks"
-                metadataKey="provider"
-                :is-editing="true"
+            <section class="provider-section">
+              <ProviderConnectionForm
+                :source="basicSourceConfig"
+                :connection="connection"
+                :available-models="availableModels"
+                :configured-models="sourceProviders"
+                :loading-models="loadingModels"
+                :saving-source="savingSource"
+                :modified="isSourceModified"
+                :key-link="selectedProviderSource.provider === 'ssycloud' ? 'https://www.shengsuanyun.com/?from=CH_T70U2X9L' : undefined"
+                :tm="tm"
+                @save="saveConnection"
+                @fetch-models="fetchAvailableModels"
+                @reload-profiles="loadConnectionProfiles"
               />
             </section>
 
@@ -89,13 +69,11 @@
 
             <v-divider></v-divider>
 
-            <section class="provider-section provider-section--models">
+            <section v-if="sourceProviders.length || availableModels.length" class="provider-section provider-section--models">
               <ProviderModelsPanel
                 :entries="filteredMergedModelEntries"
                 :available-count="availableModels.length"
                 v-model:model-search="modelSearch"
-                :loading-models="loadingModels"
-                :is-source-modified="isSourceModified"
                 :supports-image-input="supportsImageInput"
                 :supports-audio-input="supportsAudioInput"
                 :supports-tool-call="supportsToolCall"
@@ -104,8 +82,6 @@
                 :saving-providers="savingProviderToggles"
                 :testing-providers="testingProviders"
                 :tm="tm"
-                @fetch-models="fetchAvailableModels"
-                @open-manual-model="openManualModelDialog"
                 @open-provider-edit="openProviderEdit"
                 @toggle-provider-enable="toggleProviderEnable"
                 @test-provider="testProvider"
@@ -122,37 +98,6 @@
         </div>
       </div>
     </div>
-
-    <v-dialog v-model="showManualModelDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-h3 pa-4 pb-0 pl-6">
-          {{ tm('models.manualDialogTitle') }}
-        </v-card-title>
-        <v-card-text class="py-4">
-          <v-text-field
-            v-model="manualModelId"
-            :label="tm('models.manualDialogModelLabel')"
-            flat
-            variant="solo-filled"
-            autofocus
-            clearable
-          ></v-text-field>
-          <v-text-field
-            :model-value="manualProviderId"
-            flat
-            variant="solo-filled"
-            :label="tm('models.manualDialogPreviewLabel')"
-            persistent-hint
-            :hint="tm('models.manualDialogPreviewHint')"
-          ></v-text-field>
-        </v-card-text>
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="showManualModelDialog = false">取消</v-btn>
-          <v-btn color="primary" variant="tonal" @click="confirmManualModel">添加</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
     <v-dialog v-model="showProviderEditDialog" width="800">
       <v-card>
@@ -196,10 +141,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useModuleI18n } from '@/i18n/composables'
 import AstrBotConfig from '@/components/shared/AstrBotConfig.vue'
 import ProviderModelsPanel from '@/components/provider/ProviderModelsPanel.vue'
+import ProviderConnectionForm from '@/components/provider/ProviderConnectionForm.vue'
 import ProviderSourceSubtitle from '@/components/provider/ProviderSourceSubtitle.vue'
 import ProviderSourcesPanel from '@/components/provider/ProviderSourcesPanel.vue'
 import { useProviderModelConfigDialog } from '@/composables/useProviderModelConfigDialog'
@@ -235,14 +181,16 @@ const {
   isSourceModified,
   configSchema,
   providerSourceSchema,
-  manualModelId,
   modelSearch,
   availableSourceTypes,
   displayedProviderSources,
   filteredMergedModelEntries,
   basicSourceConfig,
+  sourceProviders,
+  connection,
+  saveConnection,
+  loadConnectionProfiles,
   advancedSourceConfig,
-  manualProviderId,
   resolveSourceIcon,
   isMonochromeSourceIcon,
   getSourceDisplayName,
@@ -254,7 +202,6 @@ const {
   selectProviderSource,
   addProviderSource,
   deleteProviderSource,
-  saveProviderSource,
   fetchAvailableModels,
   buildModelProviderConfig,
   deleteProvider,
@@ -267,19 +214,6 @@ const {
   tm,
   showMessage
 })
-
-const providerSourceFieldLinks = computed(() => (
-  selectedProviderSource.value?.provider === 'ssycloud'
-    ? {
-        key: {
-          label: tm('providerSources.getApiKey'),
-          href: 'https://www.shengsuanyun.com/?from=CH_T70U2X9L'
-        }
-      }
-    : {}
-))
-
-const showManualModelDialog = ref(false)
 
 const {
   showProviderEditDialog,
@@ -300,33 +234,6 @@ const {
   showMessage
 })
 
-function openManualModelDialog() {
-  if (!selectedProviderSource.value) {
-    showMessage(tm('providerSources.selectHint'), 'error')
-    return
-  }
-  manualModelId.value = ''
-  showManualModelDialog.value = true
-}
-
-async function confirmManualModel() {
-  const modelId = manualModelId.value.trim()
-  if (!selectedProviderSource.value) {
-    showMessage(tm('providerSources.selectHint'), 'error')
-    return
-  }
-  if (!modelId) {
-    showMessage(tm('models.manualModelRequired'), 'error')
-    return
-  }
-  if (modelAlreadyConfigured(modelId)) {
-    showMessage(tm('models.manualModelExists'), 'error')
-    return
-  }
-  showManualModelDialog.value = false
-  openModelAddDialog(modelId)
-}
-
 </script>
 
 <style scoped>
@@ -345,7 +252,7 @@ async function confirmManualModel() {
   border-radius: 24px;
   background: rgb(var(--v-theme-surface));
   display: grid;
-  grid-template-columns: minmax(280px, 320px) 1px minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 260px) 1px minmax(0, 1fr);
   min-height: 0;
   overflow: hidden;
 }
@@ -389,31 +296,7 @@ async function confirmManualModel() {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  padding: 18px 22px 14px;
-}
-
-.provider-config-headline {
-  min-width: 0;
-}
-
-.provider-config-title {
-  font-size: 21px;
-  line-height: 1.1;
-  font-weight: 680;
-  letter-spacing: -0.03em;
-  overflow-wrap: anywhere;
-}
-
-.provider-config-subtitle {
-  margin-top: 6px;
-  color: rgba(var(--v-theme-on-surface), 0.62);
-  font-size: 13px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-}
-
-.provider-config-actions {
-  flex-shrink: 0;
+  padding: 14px 18px 10px;
 }
 
 .provider-config-body {
@@ -423,7 +306,7 @@ async function confirmManualModel() {
 }
 
 .provider-section {
-  padding: 18px 22px;
+  padding: 16px 18px;
 }
 
 .provider-section--models {
@@ -492,45 +375,23 @@ async function confirmManualModel() {
   }
 
   .provider-config-header {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-  }
-
-  .provider-config-actions :deep(.v-btn) {
-    width: 100%;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
   }
 
   .provider-section {
-    padding: 16px;
+    padding: 12px;
   }
 }
 
 @media (max-width: 600px) {
-  .provider-chat-panel {
-    overflow: auto;
-  }
-
   .provider-workbench {
     border-radius: 16px;
-    overflow: visible;
   }
 
   .provider-workbench--borderless {
     border-radius: 0;
-  }
-
-  .provider-workbench__main {
-    overflow: visible;
-  }
-
-  .provider-config-body {
-    overflow-y: visible;
-  }
-
-  .provider-config-title {
-    font-size: 18px;
   }
 
   .provider-empty-state {

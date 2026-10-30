@@ -1,5 +1,5 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
-import { providerApi } from '@/api/v1'
+import { configProfileApi, providerApi } from '@/api/v1'
 import { getProviderIcon, isMonochromeProviderIcon } from '@/utils/providerUtils'
 import { askForConfirmation as askForConfirmationDialog, useConfirmDialog } from '@/utils/confirmDialog'
 import { normalizeTextInput } from '@/utils/inputValue'
@@ -81,8 +81,17 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
   const isSourceModified = ref(false)
   const configSchema = ref<Record<string, any>>({})
   const providerTemplates = ref<Record<string, any>>({})
-  const manualModelId = ref('')
   const modelSearch = ref('')
+  const connection = ref({
+    model: '',
+    profileId: '',
+    profiles: [] as Record<string, any>[],
+    profilesLoading: false,
+    profileError: false,
+    busy: false,
+    result: '',
+    failed: false
+  })
 
   let suppressSourceWatch = false
   const unsavedProviderSourceMarker = Symbol('unsavedProviderSource')
@@ -241,13 +250,6 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     })
   })
 
-  const manualProviderId = computed(() => {
-    if (!selectedProviderSource.value) return ''
-    const modelId = manualModelId.value.trim()
-    if (!modelId) return ''
-    return `${selectedProviderSource.value.id}/${modelId}`
-  })
-
   const basicSourceConfig = computed(() => {
     if (!editableProviderSource.value) return null
 
@@ -326,7 +328,12 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     if (suppressSourceWatch) return
     if (!editableProviderSource.value) return
     isSourceModified.value = true
+    connection.value.result = ''
   }, { deep: true })
+
+  watch(() => [connection.value.model, connection.value.profileId], () => {
+    connection.value.result = ''
+  })
 
   // ===== Helper Functions =====
   function isTypeMatchingProviderType(type?: string, providerType?: string) {
@@ -417,6 +424,7 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
   }
 
   function selectProviderSource(source: any) {
+    if (connection.value.busy || savingSource.value || loadingModels.value) return
     if (source?.isPlaceholder && source.templateKey) {
       addProviderSource(source.templateKey)
       return
@@ -434,6 +442,9 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     availableModels.value = []
     modelMetadata.value = {}
     isSourceModified.value = false
+    connection.value.model = ''
+    connection.value.profileId = ''
+    connection.value.result = ''
   }
 
   function ensureProviderSourceDefaults(source: any) {
@@ -497,6 +508,7 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
   }
 
   function addProviderSource(templateKey: string) {
+    if (connection.value.busy || savingSource.value || loadingModels.value) return
     const sponsor = templateKey.startsWith('sponsor:')
       ? sponsorCatalog.value?.sponsors.find(item => `sponsor:${item.id}` === templateKey)
       : null
@@ -527,6 +539,9 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     availableModels.value = []
     modelMetadata.value = {}
     isSourceModified.value = true
+    connection.value.model = ''
+    connection.value.profileId = ''
+    connection.value.result = ''
   }
 
   async function deleteProviderSource(source: any) {
@@ -553,7 +568,7 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     }
   }
 
-  async function saveProviderSource() {
+  async function saveProviderSource(silent = false) {
     if (!selectedProviderSource.value) return
 
     savingSource.value = true
@@ -582,21 +597,22 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
       }
 
       suppressSourceWatch = true
-      editableProviderSource.value = selectedProviderSource.value
-      nextTick(() => {
-        suppressSourceWatch = false
-      })
+      editableProviderSource.value = JSON.parse(JSON.stringify(selectedProviderSource.value))
+      await nextTick()
+      suppressSourceWatch = false
 
       delete sourceBeingSaved[unsavedProviderSourceMarker]
       isSourceModified.value = false
-      showMessage(response.data.message || tm('providerSources.saveSuccess'))
+      if (!silent) showMessage(response.data.message || tm('providerSources.saveSuccess'))
+      await loadConfig()
       return true
     } catch (error: any) {
-      showMessage(error.response?.data?.message || error.message || tm('providerSources.saveError'), 'error')
+      const detail = error.response?.data?.message || error.message || tm('providerSources.saveError')
+      if (silent) connection.value.result = detail
+      else showMessage(detail, 'error')
       return false
     } finally {
       savingSource.value = false
-      loadConfig()
     }
   }
 
@@ -675,7 +691,7 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     }
   }
 
-  async function addModelProvider(modelName: string) {
+  async function addModelProvider(modelName: string, silent = false) {
     const newProvider = buildModelProviderConfig(modelName)
     if (!newProvider) return
 
@@ -684,15 +700,89 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
         String(newProvider.provider_source_id),
         newProvider
       )
-      if (res.data.status === 'error') {
+      if (res.data.status !== 'ok') {
         throw new Error(res.data.message || tm('providerSources.saveError'))
       }
       providers.value.push(newProvider)
-      showMessage(res.data.message || tm('models.addSuccess', { model: modelName }))
+      if (!silent) showMessage(res.data.message || tm('models.addSuccess', { model: modelName }))
+      return newProvider
     } catch (error: any) {
-      showMessage(error.response?.data?.message || error.message || tm('providerSources.saveError'), 'error')
+      const detail = error.response?.data?.message || error.message || tm('providerSources.saveError')
+      if (silent) connection.value.result = detail
+      else showMessage(detail, 'error')
+      return false
     } finally {
       await loadConfig()
+    }
+  }
+
+  async function loadConnectionProfiles() {
+    connection.value.profilesLoading = true
+    connection.value.profileError = false
+    try {
+      const response = await configProfileApi.list()
+      if (response.data.status !== 'ok') throw new Error(response.data.message || '')
+      connection.value.profiles = response.data.data.info_list || []
+    } catch {
+      connection.value.profileError = true
+    } finally {
+      connection.value.profilesLoading = false
+    }
+  }
+
+  async function saveConnection() {
+    if (connection.value.busy || savingSource.value || loadingModels.value) return
+    const model = normalizeTextInput(connection.value.model).trim()
+    const profileId = model ? connection.value.profileId : ''
+    connection.value.busy = true
+    connection.value.result = ''
+    connection.value.failed = false
+    let modelSaved = false
+    try {
+      if (isSourceModified.value && !await saveProviderSource(true)) {
+        throw new Error(connection.value.result || tm('providerSources.saveError'))
+      }
+      if (!model) {
+        connection.value.result = tm('providerSources.saveSuccess')
+        return
+      }
+      let provider = sourceProviders.value.find(provider => provider.model === model)
+      if (!provider) provider = await addModelProvider(model, true)
+      if (!provider) throw new Error(connection.value.result || tm('connection.modelSaveError'))
+      modelSaved = true
+      if (profileId) {
+        // Read after creating the model so a full profile save preserves the latest configuration.
+        const response = await configProfileApi.get(profileId)
+        if (response.data.status !== 'ok' || !response.data.data.config) {
+          throw new Error(response.data.message || tm('connection.profileSaveError'))
+        }
+        const profile = response.data.data.config as Record<string, any>
+        if (profile.agent_runner?.runner_type !== 'local') {
+          throw new Error(tm('connection.thirdPartyRunner'))
+        }
+        if (provider.enable === false && !await toggleProviderEnable(provider, true)) {
+          throw new Error(tm('connection.modelSaveError'))
+        }
+        profile.agent_runner.config ??= {}
+        profile.agent_runner.config.model ??= {}
+        profile.agent_runner.config.model.provider_id = provider.id
+        const saved = await configProfileApi.update(profileId, profile)
+        if (saved.data.status !== 'ok') {
+          throw new Error(saved.data.message || tm('connection.profileSaveError'))
+        }
+        const name = connection.value.profiles.find(profile => profile.id === profileId)?.name || profileId
+        connection.value.result = tm('connection.applied', { model, name })
+      } else {
+        connection.value.result = tm('connection.saved', { model })
+      }
+    } catch (error: any) {
+      connection.value.failed = true
+      const detail = error.response?.data?.message || error.message || tm('providerSources.saveError')
+      connection.value.result = modelSaved
+        ? tm('connection.savedButNotApplied', { model, error: detail })
+        : detail
+    } finally {
+      connection.value.busy = false
     }
   }
 
@@ -776,6 +866,9 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
         providerSources.value = response.data.data.provider_sources || []
         modelMetadata.value = (response.data.data.model_metadata || {}) as Record<string, any>
         providers.value = response.data.data.providers || []
+        if (!selectedProviderSource.value && filteredProviderSources.value.length) {
+          selectProviderSource(filteredProviderSources.value[0])
+        }
       }
     } catch (error) {
       console.error('Failed to load provider template:', error)
@@ -790,6 +883,7 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
 
   onMounted(async () => {
     void loadSponsorCatalog()
+    if (selectedProviderType.value === 'chat_completion') void loadConnectionProfiles()
     await loadProviderTemplate()
   })
 
@@ -813,8 +907,8 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     isSourceModified,
     configSchema,
     providerTemplates,
-    manualModelId,
     modelSearch,
+    connection,
 
     // computed
     providerTypes,
@@ -827,7 +921,6 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     filteredProviders,
     basicSourceConfig,
     advancedSourceConfig,
-    manualProviderId,
     providerSourceSchema,
 
     // helpers
@@ -856,6 +949,8 @@ export function useProviderSources(options: UseProviderSourcesOptions) {
     toggleProviderEnable,
     testProvider,
     loadConfig,
-    loadProviderTemplate
+    loadProviderTemplate,
+    loadConnectionProfiles,
+    saveConnection
   }
 }

@@ -1,8 +1,8 @@
 <template>
   <div class="platform-page">
     <v-container fluid class="pa-0">
-      <div class="platform-content">
-        <div class="platform-workbench">
+      <div class="platform-content" :class="{ 'is-empty': platforms.length === 0 && !loadingPlatforms }">
+        <div class="platform-workbench" :class="{ 'is-empty': platforms.length === 0 && !loadingPlatforms }">
           <aside class="platform-workbench__sidebar">
             <div class="bot-list-panel">
               <div class="bot-list-panel__head">
@@ -10,6 +10,7 @@
                   {{ tm("workspace.listTitle") }}
                 </h3>
                 <v-btn
+                  v-if="platforms.length > 0"
                   color="primary"
                   prepend-icon="mdi-plus"
                   size="small"
@@ -183,7 +184,7 @@
       @deleted="handlePlatformDeleted"
     />
 
-    <v-dialog v-model="showWebhookDialog" max-width="600">
+    <v-dialog class="dashboard-form-dialog" v-model="showWebhookDialog" max-width="600" scrollable>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <v-icon class="me-2" color="primary">mdi-webhook</v-icon>
@@ -222,7 +223,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="showQrDialog" max-width="480">
+    <v-dialog class="dashboard-form-dialog" v-model="showQrDialog" max-width="480" scrollable>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <v-icon class="me-2">mdi-qrcode</v-icon>
@@ -254,7 +255,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="showErrorDialog" max-width="700">
+    <v-dialog class="dashboard-form-dialog" v-model="showErrorDialog" max-width="700" scrollable>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <v-icon class="me-2" color="error">mdi-alert-circle</v-icon>
@@ -596,6 +597,23 @@ function showError(error) {
   width: 100%;
 }
 
+/* No bots means there is nothing to select in the detail pane at any width. */
+.platform-workbench.is-empty {
+  flex: 0 0 auto;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  min-height: 280px;
+}
+
+.platform-workbench.is-empty .platform-workbench__divider,
+.platform-workbench.is-empty .platform-workbench__main {
+  display: none;
+}
+
+.platform-content.is-empty {
+  align-items: flex-start;
+}
+
 .platform-workbench__sidebar,
 .platform-workbench__main {
   min-height: 0;
@@ -829,6 +847,26 @@ function showError(error) {
     grid-template-rows: auto 1px minmax(0, 1fr);
   }
 
+  /* With no bots there is nothing to configure in the detail pane; showing a
+     second empty state underneath the list only looked like a rendering bug. */
+  .platform-workbench.is-empty {
+    grid-template-rows: auto;
+    flex: 0 0 auto;
+  }
+
+  .platform-content.is-empty {
+    align-items: flex-start;
+  }
+
+  .platform-workbench.is-empty .platform-workbench__sidebar {
+    min-height: 280px;
+  }
+
+  .platform-workbench.is-empty .platform-workbench__divider,
+  .platform-workbench.is-empty .platform-workbench__main {
+    display: none;
+  }
+
   .platform-workbench__divider {
     height: 1px;
   }
@@ -862,6 +900,7 @@ function showError(error) {
 }
 
 @media (max-width: 600px) {
+  .bot-list-panel__head { flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px 6px; }
   .platform-content {
     padding-inline: 4px;
   }
@@ -871,7 +910,7 @@ function showError(error) {
   }
 
   .platform-empty-state {
-    min-height: 260px;
+    min-height: 180px;
   }
 }
 </style>

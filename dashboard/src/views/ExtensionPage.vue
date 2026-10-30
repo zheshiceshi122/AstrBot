@@ -343,10 +343,10 @@ const updateDialogPluginLogo = computed(() => {
   </div>
 
   <v-row v-else class="extension-page">
-    <v-col cols="12" md="12">
+    <v-col cols="12" md="12" class="plugin-workspace-column">
       <v-card variant="flat" style="background-color: transparent">
         <!-- 标签页 -->
-        <v-card-text style="padding: 0px 12px">
+        <v-card-text class="plugin-workspace-content">
           <InstalledPluginsTab
             v-if="activeTab === 'installed'"
             :state="pageState"
@@ -391,7 +391,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-row>
 
   <!-- 配置对话框 -->
-  <v-dialog v-model="configDialog" max-width="900" scrollable>
+  <v-dialog class="dashboard-form-dialog" v-model="configDialog" max-width="900" scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
         tm("dialogs.config.title")
@@ -452,7 +452,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 加载对话框 -->
-  <v-dialog
+  <v-dialog class="dashboard-form-dialog"
     v-model="loadingDialog.show"
     width="700"
     persistent
@@ -460,7 +460,7 @@ const updateDialogPluginLogo = computed(() => {
   >
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{ loadingDialog.title }}</v-card-title>
-      <v-card-text style="max-height: calc(100vh - 200px); overflow-y: auto">
+      <v-card-text style="max-height: calc(var(--astrbot-overlay-height, 100dvh) - 200px); overflow-y: auto">
         <v-progress-linear
           v-if="loadingDialog.statusCode === 0"
           indeterminate
@@ -542,7 +542,7 @@ const updateDialogPluginLogo = computed(() => {
   />
 
   <!-- 更新全部插件确认对话框 -->
-  <v-dialog v-model="updateAllConfirmDialog.show" max-width="420">
+  <v-dialog class="dashboard-form-dialog" v-model="updateAllConfirmDialog.show" max-width="420">
     <v-card class="rounded-lg">
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon color="warning" class="mr-2">mdi-update</v-icon>
@@ -570,7 +570,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 指令冲突提示对话框 -->
-  <v-dialog v-model="conflictDialog.show" max-width="420">
+  <v-dialog class="dashboard-form-dialog" v-model="conflictDialog.show" max-width="420">
     <v-card class="rounded-lg">
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon color="warning" class="mr-2">mdi-alert-circle</v-icon>
@@ -608,7 +608,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 危险插件确认对话框 -->
-  <v-dialog v-model="dangerConfirmDialog" width="500" persistent>
+  <v-dialog class="dashboard-form-dialog" v-model="dangerConfirmDialog" width="500" persistent>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon color="warning" class="mr-2">mdi-alert-circle</v-icon>
@@ -630,7 +630,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 版本不兼容警告对话框 -->
-  <v-dialog v-model="versionSupportDialog.show" width="520" persistent>
+  <v-dialog class="dashboard-form-dialog" v-model="versionSupportDialog.show" width="520" persistent>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon color="warning" class="mr-2">mdi-alert</v-icon>
@@ -655,7 +655,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 上传插件对话框 -->
-  <v-dialog v-model="dialog" width="500">
+  <v-dialog class="dashboard-form-dialog" v-model="dialog" width="500">
     <div
       class="v-card v-card--density-default rounded-lg v-card--variant-elevated"
     >
@@ -972,7 +972,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 插件源管理对话框 -->
-  <v-dialog v-model="showSourceManagerDialog" width="640">
+  <v-dialog class="dashboard-form-dialog" v-model="showSourceManagerDialog" width="640">
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
         tm("market.sourceManagement")
@@ -1061,7 +1061,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 添加/编辑自定义插件源对话框 -->
-  <v-dialog v-model="showSourceDialog" width="500">
+  <v-dialog class="dashboard-form-dialog" v-model="showSourceDialog" width="500">
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
         editingSource ? tm("market.editSource") : tm("market.addSource")
@@ -1138,7 +1138,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 删除插件源确认对话框 -->
-  <v-dialog v-model="showRemoveSourceDialog" width="400">
+  <v-dialog class="dashboard-form-dialog" v-model="showRemoveSourceDialog" width="400">
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon color="warning" class="mr-2">mdi-alert-circle</v-icon>
@@ -1167,7 +1167,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- Update plugin confirmation dialog -->
-  <v-dialog v-model="updateConfirmDialog.show" width="500">
+  <v-dialog class="dashboard-form-dialog" v-model="updateConfirmDialog.show" width="500">
     <v-card class="rounded-lg">
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ tm("dialogs.update.title") }}
@@ -1252,7 +1252,7 @@ const updateDialogPluginLogo = computed(() => {
   </v-dialog>
 
   <!-- 强制更新确认对话框 -->
-  <v-dialog v-model="forceUpdateDialog.show" max-width="420">
+  <v-dialog class="dashboard-form-dialog" v-model="forceUpdateDialog.show" max-width="420">
     <v-card class="rounded-lg">
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
         <v-icon color="info" class="mr-2">mdi-information-outline</v-icon>
@@ -1290,6 +1290,30 @@ const updateDialogPluginLogo = computed(() => {
   padding: 5px;
   border-radius: 5px;
   background-color: #f5f5f5;
+}
+
+.plugin-workspace-content { padding: 0 12px; }
+.extension-page :deep(.plugin-workspace-toolbar) { padding-block: 16px; margin-bottom: 24px; }
+.extension-page :deep(.plugin-view-tabs) { background: transparent; flex: 0 0 auto; min-width: 0; }
+.extension-page :deep(.plugin-view-tab) {
+  color: rgba(var(--v-theme-on-surface), 0.54);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: 0;
+  min-width: 0;
+  padding-inline: 10px;
+}
+.extension-page :deep(.plugin-view-tab.v-tab--selected) { color: rgb(var(--v-theme-primary)); }
+.extension-page :deep(.v-tabs-slider) { background: rgb(var(--v-theme-primary)); height: 2px; }
+
+@media (max-width: 600px) {
+  .plugin-workspace-column { padding: 0; }
+  .plugin-workspace-content { padding: 0 !important; }
+  .plugin-workspace-content :deep(.v-row) { margin-inline: 0; }
+  .plugin-workspace-content :deep(.v-row > .v-col) { padding-inline: 0; }
+  .extension-page :deep(.plugin-workspace-toolbar) { padding-block: 0; margin-bottom: 8px; }
+  .extension-page :deep(.plugin-view-tab) { font-size: 13px; padding-inline: 8px; }
 }
 
 .fab-button {

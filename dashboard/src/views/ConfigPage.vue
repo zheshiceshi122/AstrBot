@@ -6,7 +6,7 @@
       class="config-panel"
     >
 
-      <div class="config-toolbar-header">
+      <PageToolbar class="config-toolbar-header">
         <div
           class="config-toolbar"
           :class="{ 'config-toolbar--searching': configSearchExpanded }"
@@ -56,7 +56,7 @@
             </div>
           </div>
         </div>
-        <div class="config-toolbar-separator">
+        <div class="config-toolbar-separator" v-if="!fetched">
           <v-progress-linear
             v-if="!fetched"
             indeterminate
@@ -64,7 +64,7 @@
             class="config-loading"
           />
         </div>
-      </div>
+      </PageToolbar>
 
       <v-slide-y-transition mode="out-in">
         <div v-if="(selectedConfigID || isSystemConfig) && fetched" :key="configContentKey" class="config-content" style="width: 100%;">
@@ -77,69 +77,50 @@
         </div>
       </v-slide-y-transition>
 
-      <!-- 浮动按钮放在 transition 外部 -->
-      <template v-if="(selectedConfigID || isSystemConfig) && fetched">
-        <v-tooltip :text="tm('actions.save')" location="left">
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-content-save" size="x-large" style="position: fixed; right: 52px; bottom: 52px;"
-              color="darkprimary" @click="updateConfig">
-            </v-btn>
+      <footer v-if="(selectedConfigID || isSystemConfig) && fetched" class="config-actionbar">
+        <span v-if="hasUnsavedChanges" class="config-actionbar__status" role="status">
+          {{ tm('messages.unsavedChangesNotice') }}
+        </span>
+        <v-menu location="top end">
+          <template #activator="{ props: menuProps }">
+            <v-btn v-bind="menuProps" icon="mdi-dots-horizontal" variant="text" :aria-label="tm('actions.more')" />
           </template>
-        </v-tooltip>
-
-        <v-tooltip :text="tm('codeEditor.title')" location="left">
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-code-json" size="x-large" style="position: fixed; right: 52px; bottom: 124px;" color="primary"
-              @click="configToString(); codeEditorDialog = true">
-            </v-btn>
-          </template>
-        </v-tooltip>
-
-        <v-tooltip text="测试当前配置" location="left" v-if="!isSystemConfig">
-          <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-chat-processing" size="x-large"
-              style="position: fixed; right: 52px; bottom: 196px;" color="primary"
-              @click="openTestChat">
-            </v-btn>
-          </template>
-        </v-tooltip>
-      </template>
+          <v-list density="compact" role="menu">
+            <v-list-item role="menuitem" prepend-icon="mdi-code-json" :title="tm('codeEditor.title')" @click="configToString(); codeEditorDialog = true" />
+          </v-list>
+        </v-menu>
+        <v-btn v-if="!isSystemConfig" class="config-actionbar__test" variant="text" @click="openTestChat">
+          {{ tm('actions.test') }}
+        </v-btn>
+        <v-btn class="config-actionbar__save" color="primary" variant="tonal" :loading="savingConfig" @click="updateConfig">
+          {{ tm('actions.save') }}
+        </v-btn>
+      </footer>
 
     </div>
   </div>
 
-  <v-slide-y-reverse-transition>
-    <div
-      v-if="fetched && hasUnsavedChanges"
-      class="unsaved-changes-pill"
-      role="status"
-      aria-live="polite"
-    >
-      <v-icon size="18">mdi-alert-circle-outline</v-icon>
-      <span>{{ tm('messages.unsavedChangesNotice') }}</span>
-    </div>
-  </v-slide-y-reverse-transition>
 
 
   <!-- Full Screen Editor Dialog -->
-  <v-dialog v-model="codeEditorDialog" fullscreen transition="dialog-bottom-transition" scrollable>
+  <v-dialog class="config-code-dialog" v-model="codeEditorDialog" fullscreen transition="dialog-bottom-transition" scrollable>
     <v-card>
-      <v-toolbar color="primary" dark>
+      <v-toolbar class="config-code-toolbar" color="primary" dark density="compact">
         <v-btn icon variant="text" @click="codeEditorDialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-toolbar-title>{{ tm('codeEditor.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-toolbar-items style="display: flex; align-items: center;">
-          <v-btn style="margin-left: 16px;" size="small" variant="text" @click="configToString()">{{
+        <v-toolbar-items class="config-code-actions">
+          <v-btn size="small" variant="text" @click="configToString()">{{
             tm('editor.revertCode') }}</v-btn>
-          <v-btn v-if="config_data_has_changed" style="margin-left: 16px;" size="small" variant="tonal" @click="applyStrConfig()">{{
+          <v-btn v-if="config_data_has_changed" size="small" variant="tonal" @click="applyStrConfig()">{{
             tm('editor.applyConfig') }}</v-btn>
-          <small style="margin-left: 16px;">💡 {{ tm('editor.applyTip') }}</small>
         </v-toolbar-items>
       </v-toolbar>
-      <v-card-text class="pa-0">
-        <VueMonacoEditor language="json" theme="vs-dark" style="height: calc(100vh - 64px);"
+      <p class="config-code-hint">💡 {{ tm('editor.applyTip') }}</p>
+      <v-card-text class="pa-0 config-editor-body">
+        <VueMonacoEditor language="json" theme="vs-dark" style="height: 100%;"
           v-model:value="config_data_str">
         </VueMonacoEditor>
       </v-card-text>
@@ -147,7 +128,7 @@
   </v-dialog>
 
   <!-- Config Management Dialog -->
-  <v-dialog v-model="configManageDialog" max-width="800px">
+  <v-dialog class="dashboard-form-dialog config-management-dialog" v-model="configManageDialog" max-width="800px" scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center justify-space-between">
         <span>{{ tm('configManagement.title') }}</span>
@@ -156,14 +137,14 @@
 
       <v-card-text>
         <small>{{ tm('configManagement.description') }}</small>
-        <div class="mt-6 mb-4">
+        <div class="config-management-create">
           <v-btn prepend-icon="mdi-plus" @click="startCreateConfig" variant="tonal" color="primary">
             {{ tm('configManagement.newConfig') }}
           </v-btn>
         </div>
 
         <!-- Config List -->
-        <v-list lines="two">
+        <v-list class="config-profile-list" lines="two">
           <v-list-item
             v-for="config in configInfoList"
             :key="config.id"
@@ -171,7 +152,7 @@
             :subtitle="config.id"
           >
             <template v-slot:append>
-              <div class="d-flex align-center" style="gap: 8px;">
+              <div class="config-profile-actions d-flex align-center">
                 <v-btn icon="mdi-content-copy" size="small" variant="text" color="primary"
                   @click="startCopyConfig(config)"></v-btn>
                 <v-btn icon="mdi-pencil" size="small" variant="text" color="warning"
@@ -186,14 +167,14 @@
         </v-list>
 
         <!-- Create/Edit Form -->
-        <v-divider v-if="showConfigForm" class="my-6"></v-divider>
+        <v-divider v-if="showConfigForm" class="my-3"></v-divider>
 
         <div v-if="showConfigForm">
           <h3 class="mb-4">{{ configFormTitle }}</h3>
 
           <h4>{{ tm('configManagement.configName') }}</h4>
 
-          <v-text-field v-model="configFormData.name" :label="tm('configManagement.fillConfigName')" variant="outlined" class="mt-4 mb-4"
+          <v-text-field v-model="configFormData.name" :label="tm('configManagement.fillConfigName')" variant="outlined" density="compact" class="mt-3 mb-3"
             hide-details></v-text-field>
 
           <div class="d-flex justify-end mt-4" style="gap: 8px;">
@@ -254,8 +235,8 @@
 
 </template>
 
-
 <script>
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { configProfileApi, systemConfigApi } from '@/api/v1';
 import AstrBotCoreConfigWrapper from '@/components/config/AstrBotCoreConfigWrapper.vue';
 import ConfigProfileMenu from '@/components/config/ConfigProfileMenu.vue';
@@ -273,6 +254,7 @@ import { normalizeTextInput } from '@/utils/inputValue';
 export default {
   name: 'ConfigPage',
   components: {
+    PageToolbar,
     AstrBotCoreConfigWrapper,
     ConfigProfileMenu,
     VueMonacoEditor,
@@ -417,6 +399,7 @@ export default {
       },
       fetched: false,
       metadata: {},
+      savingConfig: false,
       save_message_snack: false,
       save_message: "",
       save_message_success: "",
@@ -586,7 +569,7 @@ export default {
       });
     },
     async updateConfig() {
-      if (!this.fetched) return;
+      if (!this.fetched || this.savingConfig) return;
 
       const postData = {
         config: JSON.parse(JSON.stringify(this.config_data)),
@@ -598,7 +581,12 @@ export default {
         postData.conf_id = this.selectedConfigID;
       }
 
-      return this.saveAstrbotConfig(postData);
+      this.savingConfig = true;
+      try {
+        return await this.saveAstrbotConfig(postData);
+      } finally {
+        this.savingConfig = false;
+      }
     },
     async saveAstrbotConfig(postData, headers = {}, allow2faPrompt = true) {
       try {
@@ -1018,6 +1006,22 @@ export default {
   margin-top: -8px;
 }
 
+.config-code-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.config-code-toolbar .v-toolbar-title { min-width: 0; }
+.config-code-hint { flex: 0 0 auto; margin: 0; padding: 6px 12px; font-size: 12px; line-height: 1.4; }
+.config-management-create { margin: 16px 0 12px; }
+.config-profile-actions { gap: 4px; }
+
+@media (max-width: 600px) {
+  .config-code-toolbar .v-toolbar-title { margin-inline: 4px; font-size: 16px; }
+  .config-code-actions { gap: 4px; }
+  .config-code-actions .v-btn { min-width: 0; padding-inline: 8px; font-size: 12px; }
+  .config-management-create { margin: 8px 0; }
+  .config-profile-list .v-list-item { padding-inline: 0; }
+  .config-profile-list .v-list-item-title,
+  .config-profile-list .v-list-item-subtitle { white-space: normal; overflow-wrap: anywhere; }
+}
+
 .config-panel {
   display: flex;
   flex-direction: column;
@@ -1029,7 +1033,7 @@ export default {
 }
 
 .config-toolbar-header {
-  margin-bottom: 28px;
+  margin-bottom: 12px;
 }
 
 /* Pin the toolbar and navigation while the right configuration form scrolls. */
@@ -1041,31 +1045,20 @@ export default {
 
 .config-panel .config-content .config-workspace {
   height: 100%;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   align-items: stretch;
 }
 
 .config-panel .config-content .config-workspace__nav {
   position: static;
   top: auto;
-  height: 100%;
-  overflow-y: auto;
+  height: auto;
+  overflow-y: hidden;
 }
 
 .config-panel .config-content .config-workspace__main {
   height: 100%;
   overflow-y: auto;
-}
-
-@media (max-width: 720px) {
-  .config-panel .config-content .config-workspace {
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .config-panel .config-content .config-workspace__nav {
-    height: auto;
-    overflow-y: hidden;
-  }
 }
 
 .config-toolbar {
@@ -1134,26 +1127,19 @@ export default {
   left: 0;
 }
 
-.unsaved-changes-pill {
-  position: fixed;
-  left: calc(var(--v-layout-left, 0px) + 32px);
-  bottom: 52px;
-  z-index: 1005;
+.config-actionbar {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
-  max-width: min(440px, calc(100vw - var(--v-layout-left, 0px) - 160px));
-  padding: 9px 14px 9px 12px;
-  border-radius: 999px;
-  background: rgba(var(--v-theme-surface), 0.94);
-  color: rgba(var(--v-theme-on-surface), 0.82);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(16px);
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
-  white-space: nowrap;
-  pointer-events: none;
+  padding: 10px 0 8px;
+  border-top: 1px solid rgba(var(--v-theme-on-surface), .1);
 }
+.config-actionbar__status { font-size: 12px; color: rgba(var(--v-theme-on-surface), .65); }
+.config-actionbar > .v-btn { min-height: 32px; }
+.config-actionbar > .v-btn--icon { width: 32px; height: 32px; margin-left: auto; }
+.config-actionbar__test, .config-actionbar__save { min-width: 0; flex-shrink: 1; padding-inline: 12px; }
+.config-actionbar .v-btn__content { white-space: normal; line-height: 1.3; }
 
 /* 按钮切换样式优化 */
 .v-btn-toggle .v-btn {
@@ -1195,8 +1181,12 @@ export default {
 
   .config-panel {
     width: 100%;
-    padding: 0 14px 8px;
+    padding: 0 6px 4px;
   }
+
+  .config-toolbar-header { margin-bottom: 6px; }
+
+  .config-actionbar { gap: 4px; padding-block: 6px 4px; }
 
   .config-toolbar {
     flex-wrap: nowrap;
@@ -1223,24 +1213,19 @@ export default {
     min-width: 0 !important;
   }
 
-  .unsaved-changes-pill {
-    right: 16px;
-    bottom: 16px;
-    left: 16px;
-    max-width: none;
-    white-space: normal;
-  }
 }
 
 /* 测试聊天抽屉样式 */
 .test-chat-overlay {
+  box-sizing: border-box;
+  padding-block: var(--astrbot-safe-top) var(--astrbot-safe-bottom);
   align-items: stretch;
   justify-content: flex-end;
 }
 
 .test-chat-card {
   width: clamp(320px, 50vw, 720px);
-  height: calc(100vh - 32px);
+  height: calc(var(--astrbot-overlay-height, 100dvh) - 32px);
   display: flex;
   flex-direction: column;
   margin: 16px;

@@ -762,17 +762,17 @@ function formatSize(size: number) {
 @media (max-width: 760px) {
   .workspace-files-panel {
     position: fixed;
-    inset: 0;
+    inset: var(--astrbot-vv-offset-top, 0px) 0 auto;
     z-index: 1300;
     width: 100vw;
-    height: 100dvh;
+    height: var(--astrbot-viewport-height, 100dvh);
     margin-top: 0;
     border-left: 0;
   }
 
   .workspace-toolbar {
-    min-height: calc(52px + env(safe-area-inset-top));
-    padding: calc(8px + env(safe-area-inset-top)) 8px 8px 12px;
+    min-height: 52px;
+    padding: 8px 8px 8px 12px;
     border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.1);
   }
 

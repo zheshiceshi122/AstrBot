@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page subagent-page" :class="{ 'is-dark': isDark }">
     <v-container fluid class="dashboard-shell pa-4 pa-md-6">
-      <div class="dashboard-header">
+      <PageToolbar class="dashboard-header">
         <div class="dashboard-header-main">
           <div class="d-flex align-center flex-wrap" style="gap: 8px;">
             <h1 class="dashboard-title">{{ tm('page.title') }}</h1>
@@ -9,18 +9,14 @@
               {{ tm('page.beta') }}
             </v-chip>
           </div>
-          <p class="dashboard-subtitle">{{ tm('page.subtitle') }}</p>
         </div>
 
-        <div class="dashboard-header-actions">
-          <v-btn variant="text" color="primary" prepend-icon="mdi-refresh" :loading="loading" @click="reload">
-            {{ tm('actions.refresh') }}
-          </v-btn>
-          <v-btn variant="tonal" color="primary" prepend-icon="mdi-content-save" :loading="saving" @click="save">
-            {{ tm('actions.save') }}
-          </v-btn>
-        </div>
-      </div>
+        <template #actions><div class="dashboard-header-actions">
+          <v-btn variant="text" color="primary" :loading="loading" :aria-label="tm('actions.refresh')" :title="tm('actions.refresh')" @click="reload"><RefreshCw :size="18" /><span class="dashboard-action-label">{{ tm('actions.refresh') }}</span></v-btn>
+          <v-btn variant="tonal" color="primary" :loading="saving" :aria-label="tm('actions.save')" :title="tm('actions.save')" @click="save"><Save :size="18" /><span class="dashboard-action-label">{{ tm('actions.save') }}</span></v-btn>
+        </div></template>
+        <template #description><p class="dashboard-subtitle">{{ tm('page.subtitle') }}</p></template>
+      </PageToolbar>
 
       <div v-if="hasUnsavedChanges" class="unsaved-banner">
         <v-icon size="18" color="warning">mdi-alert-circle-outline</v-icon>
@@ -90,9 +86,6 @@
           <v-icon icon="mdi-robot-off" size="60" class="mb-4" />
           <div class="empty-title">{{ tm('empty.title') }}</div>
           <div class="dashboard-empty mb-4">{{ tm('empty.subtitle') }}</div>
-          <v-btn color="primary" variant="tonal" @click="addAgent">
-            {{ tm('empty.action') }}
-          </v-btn>
         </div>
       </div>
 
@@ -210,6 +203,8 @@
 </template>
 
 <script setup lang="ts">
+import { RefreshCw, Save } from '@lucide/vue';
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { onBeforeRouteLeave } from 'vue-router'
 import { useTheme } from 'vuetify'
@@ -617,10 +612,33 @@ onBeforeRouteLeave(async () => {
 }
 
 @media (max-width: 900px) {
-  .setting-card-head,
   .agent-summary {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+@media (max-width: 600px) {
+  .subagent-page { padding-bottom: 8px; }
+  .setting-card { padding: 10px 12px; }
+  .setting-card-head { align-items: center; gap: 10px; }
+  .setting-card-head > div { flex: 1; min-width: 0; }
+  .setting-card-head :deep(.v-switch) { flex: 0 0 auto; }
+  .setting-subtitle { margin-top: 3px; }
+  .agent-edit-grid, .agent-panel { gap: 10px; }
+  .empty-card { min-height: 180px; }
+  .persona-preview-wrap { min-height: 0; }
+}
+@media (max-width: 600px) {
+
+  .global-settings-grid { gap: 0; border: 1px solid var(--dashboard-border); border-radius: 9px; overflow: hidden; margin-bottom: 12px !important; }
+  .setting-card { padding: 8px 10px; border: 0; border-radius: 0; }
+  .setting-card + .setting-card { border-top: 1px solid var(--dashboard-border); }
+  .setting-title { font-size: 13px; line-height: 1.4; }
+  .setting-subtitle { margin-top: 2px; font-size: 12px; line-height: 1.4; }
+  .empty-card { min-height: 0; }
+  .empty-wrap { gap: 6px; }
+  .empty-wrap > .v-icon { width: 32px !important; height: 32px !important; font-size: 32px !important; }
+  .empty-title { font-size: 15px; }
+  .empty-wrap .mb-4 { margin-bottom: 2px !important; }
 }
 </style>

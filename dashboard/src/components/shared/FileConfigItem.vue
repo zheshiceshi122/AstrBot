@@ -9,7 +9,7 @@
       </span>
     </div>
 
-    <v-dialog v-model="dialog" max-width="700">
+    <v-dialog class="dashboard-form-dialog" v-model="dialog" max-width="700" scrollable>
       <v-card class="file-dialog-card" variant="flat">
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <span>{{ tm('fileUpload.dialogTitle') }}</span>

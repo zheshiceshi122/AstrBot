@@ -145,6 +145,27 @@
       "proxy": "Proxy"
     }
   },
+  "connection": {
+    "help": "Setup help",
+    "title": "Connection and model",
+    "model": "Model",
+    "modelPlaceholder": "Enter a model ID or choose a fetched model",
+    "modelHint": "You can enter a model ID without fetching the list.",
+    "applyTo": "Chat configuration profile",
+    "saveOnly": "Save model without switching",
+    "profileHint": "Only changes the selected profile. Session-specific model overrides stay in effect.",
+    "profilesError": "Profiles could not be loaded. You can still save the API and model.",
+    "reloadProfiles": "Reload profiles",
+    "unsaved": "Unsaved changes",
+    "saveAndUse": "Save and use",
+    "saveModel": "Save API and model",
+    "saved": "Model {model} saved. Select a profile above to use it for chat.",
+    "applied": "Using {model} for chat in “{name}”.",
+    "modelSaveError": "The model was not saved. Check the error before saving again.",
+    "profileSaveError": "Could not apply the model to the profile.",
+    "savedButNotApplied": "Model {model} saved, but not applied: {error}",
+    "thirdPartyRunner": "This profile uses a third-party agent. Its runner was not changed. Choose a profile using AstrBot built-in AI."
+  },
   "models": {
     "title": "Models",
     "available": "Available Models",

@@ -9,6 +9,9 @@ import type { Component } from "vue";
 export const useHeaderContextStore = defineStore("headerContext", {
   state: () => ({
     component: null as Component | null,
+    mobileActionsTarget: null as HTMLElement | null,
+    compactMobile: false,
+    backLink: null as { to: string; key: string } | null,
   }),
   actions: {
     SET_COMPONENT(component: Component | null) {

@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
-import { Minus, PackagePlus, Plus } from "@lucide/vue";
+import { Ellipsis, Minus, PackagePlus, Plus } from "@lucide/vue";
 import ConsoleDisplayer from "@/components/shared/ConsoleDisplayer.vue";
 import LogExportButton from "@/components/shared/LogExportButton.vue";
-import { useModuleI18n } from "@/i18n/composables";
+import { useI18n, useModuleI18n } from "@/i18n/composables";
 import { useCustomizerStore } from "@/stores/customizer";
 import { updatesApi } from "@/api/v1";
 import { useToast } from "@/utils/toast";
 
 const { tm } = useModuleI18n("features/console");
+const { t } = useI18n();
 const toast = useToast();
 const customizerStore = useCustomizerStore();
 
@@ -65,8 +66,9 @@ async function pipInstall() {
     >
       <template #header-actions>
         <div class="console-header-actions">
-          <LogExportButton />
+          <LogExportButton v-if="!$vuetify.display.xs" />
           <div
+            v-if="!$vuetify.display.xs"
             class="console-font-controls"
             role="group"
             :aria-label="tm('fontSize.label')"
@@ -97,9 +99,25 @@ async function pipInstall() {
               <Plus :size="15" aria-hidden="true" />
             </v-btn>
           </div>
-          <v-dialog v-model="pipDialog" width="440" attach="#console-wrapper">
+          <v-menu v-if="$vuetify.display.xs" location="bottom end" :close-on-content-click="false">
+            <template #activator="{ props }"><v-btn v-bind="props" icon variant="text" :aria-label="t('core.navigation.options')" :title="t('core.navigation.options')"><Ellipsis :size="20" /></v-btn></template>
+            <v-list min-width="240">
+              <v-list-item><LogExportButton /></v-list-item>
+              <v-list-item>
+                <div class="console-font-controls" role="group" :aria-label="tm('fontSize.label')">
+                  <span>{{ tm('fontSize.label') }}</span>
+                  <v-btn icon variant="text" :disabled="logFontSize <= 8" :aria-label="tm('fontSize.decrease')" @click="logFontSize -= 2"><Minus :size="18" /></v-btn>
+                  <output>{{ logFontSize }}px</output>
+                  <v-btn icon variant="text" :disabled="logFontSize >= 16" :aria-label="tm('fontSize.increase')" @click="logFontSize += 2"><Plus :size="18" /></v-btn>
+                </div>
+              </v-list-item>
+              <v-list-item @click="pipDialog = true"><v-list-item-title>{{ tm('pipInstall.button') }}</v-list-item-title></v-list-item>
+            </v-list>
+          </v-menu>
+          <v-dialog class="dashboard-form-dialog" v-model="pipDialog" width="440" attach="#console-wrapper">
             <template #activator="{ props }">
               <v-btn
+                v-if="!$vuetify.display.xs"
                 v-bind="props"
                 class="pip-install-button"
                 size="small"
@@ -157,7 +175,7 @@ async function pipInstall() {
 
 <style scoped>
 .console-page {
-  --console-workspace-card: #f5f6f7;
+  --console-workspace-card: var(--color-surface);
 
   height: calc(100dvh - 112px);
   margin: 0 auto;
@@ -168,7 +186,7 @@ async function pipInstall() {
 }
 
 .console-page.is-dark {
-  --console-workspace-card: rgba(var(--v-theme-on-surface), 0.06);
+  --console-workspace-card: var(--color-surface);
 }
 
 .console-display {
@@ -181,8 +199,12 @@ async function pipInstall() {
   align-items: center;
   display: flex;
   flex: 0 0 auto;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 6px 14px;
+}
+@media (max-width: 600px) {
+  .console-header-actions { flex: 0 0 44px; gap: 0; }
+  .console-header-actions > .v-btn { width: 44px; height: 44px; }
 }
 
 .console-font-controls {

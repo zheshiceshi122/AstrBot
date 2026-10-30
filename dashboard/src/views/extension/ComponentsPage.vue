@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import ComponentPanel from "@/components/extension/componentPanel/index.vue";
 import { useModuleI18n } from "@/i18n/composables";
 
@@ -7,9 +8,9 @@ const { tm } = useModuleI18n("features/extension");
 
 <template>
   <div class="plugin-section-page">
-    <div class="mb-4 pt-4 pb-4">
+    <PageToolbar class="tool-page-header">
       <h2 class="text-h2 mb-0">{{ tm("tabs.handlersOperation") }}</h2>
-    </div>
+    </PageToolbar>
     <ComponentPanel :active="true" />
   </div>
 </template>

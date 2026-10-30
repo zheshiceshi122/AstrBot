@@ -214,23 +214,23 @@ watch(() => [props.reasoning, props.parts], scrollToLatestActivity, {
 @media (max-width: 760px) {
   .reasoning-sidebar {
     position: fixed;
-    inset: 0;
+    inset: var(--astrbot-vv-offset-top, 0px) 0 auto;
     z-index: 1300;
     width: 100vw;
-    height: 100dvh;
+    height: var(--astrbot-viewport-height, 100dvh);
     margin-top: 0;
     border-left: 0;
   }
 
   .reasoning-sidebar-header {
     min-height: 52px;
-    padding: calc(10px + env(safe-area-inset-top)) 12px 8px;
+    padding: 10px 12px 8px;
     border-bottom: 1px solid
       var(--chat-border, rgba(var(--v-border-color), 0.12));
   }
 
   .reasoning-sidebar-body {
-    padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+    padding: 0 12px 12px;
   }
 }
 </style>

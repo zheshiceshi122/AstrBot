@@ -118,6 +118,8 @@
       "umo": "UMO",
       "umoPlaceholder": "Enter a full or partial UMO",
       "sort": "Sort",
+      "more": "More filters",
+      "less": "Fewer filters",
       "reset": "Clear filters",
       "close": "Close filters",
       "done": "Done",

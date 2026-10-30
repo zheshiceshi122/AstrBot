@@ -113,7 +113,7 @@
               </v-btn>
             </div>
           </v-alert>
-          <v-data-table
+          <v-data-table :mobile="$vuetify.display.xs" density="compact"
             v-else
             :headers="headers"
             :items="filteredChunks"
@@ -194,7 +194,7 @@
     </div>
 
     <!-- 查看分块对话框 -->
-    <v-dialog v-model="showViewDialog" max-width="800px" scrollable>
+    <v-dialog class="dashboard-form-dialog" v-model="showViewDialog" max-width="800px" scrollable>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6 d-flex align-center">
           <span>{{ t('view.title') }}</span>
@@ -533,5 +533,11 @@ onMounted(() => {
   .document-detail-page {
     padding: 16px;
   }
+}
+@media (max-width: 600px) {
+  .document-detail-page { padding: 6px; } .page-header { gap: 8px; margin-bottom: 12px; } .header-content { min-width: 0; overflow-wrap: anywhere; }
+  .chunk-content-preview { max-width: 52vw; white-space: normal; overflow-wrap: anywhere; }
+  .document-detail-page :deep(.v-card-title) { padding: 12px; font-size: 16px; white-space: normal; }
+  .document-detail-page :deep(.v-card-text) { padding: 12px; }
 }
 </style>

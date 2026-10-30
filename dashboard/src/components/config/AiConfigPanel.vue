@@ -2,8 +2,7 @@
   <section class="ai-config-panel">
     <header class="ai-config-panel__header">
       <div class="ai-config-panel__heading">
-        <h2 class="ai-config-panel__title">{{ tm('aiSettings.title') }}</h2>
-        <p class="ai-config-panel__subtitle">{{ currentRunner.summary }}</p>
+        <h2 class="ai-config-panel__title">{{ tm('aiSettings.title') }}<span class="ai-config-panel__runner">{{ runnerSettingsTitle }}</span></h2>
       </div>
 
       <div class="ai-config-panel__actions">
@@ -42,20 +41,7 @@
 
     <template v-if="aiEnabled">
       <section class="ai-config-panel__section">
-        <div class="ai-config-panel__section-heading">
-          <div>
-            <h3 class="ai-config-panel__section-title">
-              <span>{{ runnerSettingsTitle }}</span>
-              <AstrBotLogo
-                v-if="runnerType === 'local'"
-                class="ai-config-panel__brand-logo"
-              />
-            </h3>
-            <p class="ai-config-panel__section-subtitle">
-              {{ currentRunner.description }}
-            </p>
-          </div>
-        </div>
+        <p class="ai-config-panel__section-subtitle ai-config-panel__runner-description">{{ currentRunner.description }}</p>
 
         <template v-if="runnerType === 'local'">
           <div class="ai-config-tabs" role="tablist" :aria-label="runnerSettingsTitle">
@@ -96,10 +82,13 @@
         </div>
       </section>
 
-      <section v-if="commonGroups.length" class="ai-config-panel__section ai-config-panel__section--common">
+      <section v-if="commonGroups.length && (runnerType !== 'local' || activeLocalTab === 'common')" class="ai-config-panel__section ai-config-panel__section--common">
         <div class="ai-config-panel__section-heading">
           <div>
-            <h3 class="ai-config-panel__section-title">{{ tm('aiSettings.common.title') }}</h3>
+            <div class="ai-config-panel__common-title-row">
+              <h3 class="ai-config-panel__section-title">{{ tm('aiSettings.common.title') }}</h3>
+              <span class="ai-config-panel__common-scope">{{ tm('aiSettings.common.scope') }}</span>
+            </div>
             <p class="ai-config-panel__section-subtitle">
               {{ tm('aiSettings.common.subtitle') }}
             </p>
@@ -127,7 +116,7 @@
       </div>
     </div>
 
-    <v-dialog v-model="runnerDialog" max-width="560">
+    <v-dialog class="dashboard-form-dialog" v-model="runnerDialog" max-width="560">
       <v-card class="runner-dialog-card">
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">
           {{ tm('aiSettings.runnerDialog.title') }}
@@ -224,7 +213,7 @@ const { tm } = useModuleI18n('features/config');
 const runnerDialog = ref(false);
 const pendingRunnerType = ref('local');
 const runnerChangeAcknowledged = ref(false);
-const activeLocalTab = ref('model');
+const activeLocalTab = ref('common');
 
 const aiEnabled = computed({
   get() {
@@ -254,15 +243,14 @@ const runnerOptions = computed(() => {
   return availableTypes.map((value) => ({
     value,
     title: tm(`aiSettings.runners.${value}.title`),
-    description: tm(`aiSettings.runners.${value}.description`),
-    summary: tm(`aiSettings.runners.${value}.summary`)
+    description: tm(`aiSettings.runners.${value}.description`)
   }));
 });
 
 const currentRunner = computed(() => (
   runnerOptions.value.find((runner) => runner.value === runnerType.value)
   || runnerOptions.value[0]
-  || { value: 'local', title: 'AI', description: '', summary: '' }
+  || { value: 'local', title: 'AI', description: '' }
 ));
 
 const runnerSettingsTitle = computed(() => (
@@ -272,6 +260,7 @@ const runnerSettingsTitle = computed(() => (
 ));
 
 const localTabs = computed(() => [
+  { value: 'common', label: tm('aiSettings.tabs.common') },
   { value: 'model', label: tm('aiSettings.tabs.model') },
   { value: 'persona', label: tm('aiSettings.tabs.persona') },
   { value: 'capabilities', label: tm('aiSettings.tabs.capabilities') },
@@ -339,7 +328,9 @@ const localTabGroups = computed(() => {
 });
 
 const activeLocalGroups = computed(() => (
-  localTabGroups.value[activeLocalTab.value] || localTabGroups.value.model
+  activeLocalTab.value === 'common'
+    ? []
+    : localTabGroups.value[activeLocalTab.value] || localTabGroups.value.model
 ));
 
 const thirdPartyRunnerGroup = computed(() => {
@@ -369,7 +360,7 @@ const commonGroups = computed(() => [
 ].filter(Boolean));
 
 watch(runnerType, () => {
-  activeLocalTab.value = 'model';
+  activeLocalTab.value = 'common';
 });
 
 watch(pendingRunnerType, () => {
@@ -410,6 +401,8 @@ function confirmRunnerChange() {
   margin-bottom: 30px;
 }
 
+.ai-config-panel__runner { margin-left: 8px; font-size: 14px; font-weight: 500; }
+
 .ai-config-panel__heading {
   min-width: 0;
 }
@@ -423,7 +416,6 @@ function confirmRunnerChange() {
   line-height: 1.25;
 }
 
-.ai-config-panel__subtitle,
 .ai-config-panel__section-subtitle {
   margin: 5px 0 0;
   color: rgba(var(--v-theme-on-surface), 0.62);
@@ -453,9 +445,28 @@ function confirmRunnerChange() {
 }
 
 .ai-config-panel__section--common {
-  margin-top: 32px;
-  padding-top: 28px;
-  border-top: 1px solid rgba(17, 24, 39, 0.09);
+  margin-top: 0;
+  padding: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+.ai-config-panel__common-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-config-panel__common-scope {
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  padding: 1px 7px;
+  color: var(--color-ink-soft);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
 }
 
 .ai-config-panel__section-heading {
@@ -485,11 +496,15 @@ function confirmRunnerChange() {
 
 .ai-config-tabs {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 4px;
   margin-bottom: 14px;
   overflow-x: auto;
+  scrollbar-width: none;
 }
+
+.ai-config-tabs::-webkit-scrollbar { display: none; }
 
 .ai-config-tabs__item {
   flex: 0 0 auto;
@@ -503,17 +518,18 @@ function confirmRunnerChange() {
   font: inherit;
   font-size: 0.78rem;
   font-weight: 650;
+  white-space: nowrap;
 }
 
 .ai-config-tabs__item:hover {
-  color: rgb(var(--v-theme-on-surface));
-  background: rgba(var(--v-theme-on-surface), 0.045);
+  color: rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-primary), 0.06);
 }
 
 .ai-config-tabs__item--active {
-  color: rgb(var(--v-theme-on-surface));
-  background: rgba(var(--v-theme-on-surface), 0.08);
-  font-weight: 740;
+  color: rgb(var(--v-theme-primary));
+  background: var(--color-accent-soft);
+  font-weight: 700;
 }
 
 .ai-disabled-state {
@@ -619,18 +635,22 @@ function confirmRunnerChange() {
 }
 
 @media (max-width: 600px) {
-  .ai-config-panel__header {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .ai-config-panel__actions {
-    justify-content: space-between;
-  }
-
-  .ai-enable-control {
-    flex: 1;
-  }
+  .ai-config-panel__header { gap: 8px; margin-bottom: 10px; }
+  .ai-config-panel__title { font-size: 17px; }
+  .ai-config-panel__actions { justify-content: flex-end; }
+  .ai-config-panel__section--common { padding: 12px; }
+  .ai-config-panel__section-heading { gap: 8px; margin-bottom: 8px; }
+  .ai-config-panel__section-title { font-size: 14px; }
+  .ai-config-tabs { margin-bottom: 8px; }
+  .ai-config-tabs__item { min-height: 40px; padding: 8px 12px; font-size: 13px; }
+  .ai-disabled-state { min-height: 60px; padding: 10px 12px; gap: 8px; }
+}
+@media (max-width: 600px) {
+  .ai-config-panel__title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
+  .ai-config-panel__runner { font-size: 12px; font-weight: 500; color: rgba(var(--v-theme-on-surface), .65); }
+  .ai-config-panel__header { margin-bottom: 2px; align-items: center; }
+  .ai-config-panel__runner-description { margin: 0 0 6px; font-size: 12px; }
+  .ai-config-panel__section--common { padding: 10px; }
+  .ai-config-panel__section-subtitle { font-size: 12px; }
 }
 </style>

@@ -129,11 +129,30 @@ onMounted(async () => {
   background-color: rgb(var(--v-theme-containerBg));
   position: relative;
   width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+html[data-mobile-standalone='true'] .setup-page-container {
+  background: var(--page-background);
+}
+
+html[data-mobile-keyboard='true'] .setup-page-container {
+  align-items: flex-start;
+  padding: 16px 0;
+}
+
+@media (max-width: 600px) {
+  .setup-page-container .v-field__input,
+  .setup-page-container .v-field__input input {
+    font-size: 16px;
+  }
 }
 
 .setup-card {

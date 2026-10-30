@@ -1489,4 +1489,76 @@ onBeforeUnmount(() => {
     width: 140px;
   }
 }
+
+/* Phone: the handler table's two-column label/description layout squeezed the
+   description into a narrow strip and made every skill several screens tall. */
+@media (max-width: 600px) {
+  .plugin-detail-page {
+    padding: 8px 12px 24px;
+  }
+
+  .detail-header {
+    margin-bottom: 14px;
+    padding: 4px 0;
+  }
+
+  .detail-title {
+    font-size: 1.25rem;
+  }
+
+  .plugin-summary-card__body {
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .plugin-summary-card__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+  }
+
+  .plugin-summary-card__title {
+    font-size: 1.4rem;
+  }
+
+  .detail-section {
+    margin-top: 18px;
+  }
+
+  .detail-handler-table :deep(table),
+  .detail-handler-table :deep(tbody),
+  .detail-handler-table :deep(tr),
+  .detail-handler-table :deep(td) {
+    display: block;
+    width: auto;
+    min-width: 0;
+  }
+
+  .detail-handler-table :deep(tr) {
+    height: auto !important;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  }
+
+  .detail-handler-table :deep(tr:last-child) {
+    border-bottom: 0;
+  }
+
+  .detail-handler-table :deep(td) {
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0;
+    overflow: visible;
+    border: 0 !important;
+  }
+
+  .detail-handler-table :deep(td:first-child) {
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .detail-handler-table :deep(.handler-row__desc) {
+    padding: 0 0 4px;
+  }
+}
 </style>

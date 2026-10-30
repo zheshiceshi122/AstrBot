@@ -25,7 +25,7 @@
   </div>
 
   <!-- Knowledge Base Selection Dialog -->
-  <v-dialog v-model="dialog" max-width="600px">
+  <v-dialog class="dashboard-form-dialog" v-model="dialog" max-width="600px">
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ tm('knowledgeBaseSelector.dialogTitle') }}
@@ -65,13 +65,10 @@
             </template>
           </v-list-item>
           
-          <!-- 当没有知识库时显示创建提示 -->
+          <!-- 当没有知识库时只说明状态；创建入口统一在 扩展 → 知识库。 -->
           <div v-if="knowledgeBaseList.length === 0" class="text-center py-8">
             <v-icon size="64" color="grey-lighten-1">mdi-database-off</v-icon>
-            <p class="text-grey mt-4 mb-4">{{ tm('knowledgeBaseSelector.noKnowledgeBases') }}</p>
-            <v-btn color="primary" variant="tonal" @click="goToKnowledgeBasePage">
-              {{ tm('knowledgeBaseSelector.createKnowledgeBase') }}
-            </v-btn>
+            <p class="text-grey mt-4">{{ tm('knowledgeBaseSelector.noKnowledgeBases') }}</p>
           </div>
         </v-list>
       </v-card-text>
@@ -96,7 +93,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { knowledgeApi } from '@/api/v1'
-import { useRouter } from 'vue-router'
 import { useModuleI18n } from '@/i18n/composables'
 
 const props = defineProps({
@@ -111,7 +107,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
-const router = useRouter()
 const { tm } = useModuleI18n('core.shared')
 
 const dialog = ref(false)
@@ -191,11 +186,6 @@ function cancelSelection() {
     ? [...props.modelValue] 
     : []
   dialog.value = false
-}
-
-function goToKnowledgeBasePage() {
-  dialog.value = false
-  router.push('/knowledge-base')
 }
 </script>
 

@@ -19,7 +19,7 @@
   </div>
 
   <!-- Key-Value Management Dialog -->
-  <v-dialog v-model="dialog" max-width="600px">
+  <v-dialog class="dashboard-form-dialog" v-model="dialog" max-width="600px" scrollable>
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ resolveDialogTitle }}
@@ -206,7 +206,7 @@
 
       <!-- Add new key-value pair section -->
       <v-card-text class="pa-4">
-        <div class="d-flex align-center ga-2">
+        <div class="object-add-controls d-flex align-center ga-2">
           <v-text-field
             v-model="newKey"
             :label="t('core.common.objectEditor.newKeyLabel')"
@@ -573,5 +573,25 @@ function resolveTemplateText(templateKey, attr, fallback) {
 
 .template-field-inactive {
   opacity: 0.8;
+}
+
+@media (max-width: 600px) {
+  .key-value-pair > .v-row,
+  .template-field > .v-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) 40px;
+    gap: 6px;
+  }
+
+  .key-value-pair .v-col,
+  .template-field .v-col {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding-left: 0 !important;
+  }
+
+  .object-add-controls { flex-wrap: wrap; }
+  .object-add-controls > .v-text-field { flex-basis: 100%; }
 }
 </style>

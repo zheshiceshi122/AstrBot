@@ -67,5 +67,7 @@
   },
   "debugHint": {
     "text": "Debug 日志需要在「配置文件 → 系统 → 控制台日志级别」中开启"
-  }
+  },
+  "fullscreen": "全屏查看日志",
+  "exitFullscreen": "退出全屏"
 }

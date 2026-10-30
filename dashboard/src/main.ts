@@ -4,13 +4,18 @@ import App from './App.vue';
 import { router } from './router';
 import vuetify from './plugins/vuetify';
 import confirmPlugin from './plugins/confirmPlugin';
-import { setupI18n } from './i18n/composables';
+import { setupI18n, useI18n } from './i18n/composables';
 import '@/scss/style.scss';
+import '@/styles/mobile-dashboard.css';
 
 import print from 'vue3-print-nb';
 import { setupHttpClient } from './api/http';
 import { waitForRouterReadyInBackground } from './utils/routerReadiness.mjs';
+import { installIOSStatusBar } from './utils/iosStatusBar';
 
+// Set native viewport-fit before Vue creates or measures the application shell.
+const disposeIOSStatusBar = installIOSStatusBar();
+if (import.meta.hot) import.meta.hot.dispose(disposeIOSStatusBar);
 setupHttpClient();
 
 /**
@@ -87,6 +92,23 @@ setupI18n().then(async () => {
   app.use(confirmPlugin);
   await router.isReady();
   app.mount('#app');
+
+  // Vuetify owns the strings of data-table footers and a11y labels; follow the
+  // dashboard language so the two systems never disagree on screen.
+  const { locale } = useI18n();
+  const vuetifyLocales: Record<string, string> = {
+    'zh-CN': 'zhHans',
+    'en-US': 'en',
+    'ja-JP': 'ja',
+    'ru-RU': 'ru',
+  };
+  watch(
+    locale,
+    (value) => {
+      vuetify.locale.current.value = vuetifyLocales[value] ?? 'en';
+    },
+    { immediate: true },
+  );
 
   setupThemeSync(pinia);
 }).catch(error => {

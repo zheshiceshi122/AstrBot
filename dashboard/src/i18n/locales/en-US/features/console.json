@@ -67,5 +67,7 @@
   },
   "debugHint": {
     "text": "Debug logs can be enabled in \"Configuration File → System → Console Log Level\""
-  }
+  },
+  "fullscreen": "View logs fullscreen",
+  "exitFullscreen": "Exit fullscreen"
 }

@@ -189,14 +189,14 @@ const openMarketPluginDetail = (plugin) => {
 
 <template>
   <v-tab-item v-show="activeTab === 'market'">
-    <div class="mb-6 pt-4 pb-4">
+    <div class="plugin-workspace-toolbar">
       <div class="market-header-row d-flex align-center">
         <div class="market-header-primary d-flex align-center">
           <v-tabs
             model-value="market"
             bg-color="transparent"
             class="plugin-view-tabs"
-            height="42"
+            height="40"
           >
             <v-tab
               value="installed"
@@ -224,6 +224,7 @@ const openMarketPluginDetail = (plugin) => {
                 rounded="md"
                 color="primary"
                 class="market-source-button text-none px-2"
+                :aria-label="tm('market.sourceManagement')"
                 @click="openSourceManagerDialog"
               >
                 <v-icon size="18" class="mr-1">mdi-source-branch</v-icon>
@@ -233,6 +234,15 @@ const openMarketPluginDetail = (plugin) => {
               </v-btn>
             </template>
           </v-tooltip>
+          <v-btn
+            class="market-mobile-install"
+            icon="mdi-plus"
+            variant="tonal"
+            color="primary"
+            :aria-label="tm('market.installPlugin')"
+            :title="tm('market.installPlugin')"
+            @click="openInstallDialog"
+          />
         </div>
 
         <v-text-field
@@ -240,7 +250,8 @@ const openMarketPluginDetail = (plugin) => {
           @update:model-value="marketSearch = normalizeTextInput($event)"
           class="market-search-field ml-auto"
           density="compact"
-          :label="tm('search.marketPlaceholder')"
+          :placeholder="tm('search.marketPlaceholder')"
+          :aria-label="tm('search.marketPlaceholder')"
           prepend-inner-icon="mdi-magnify"
           clearable
           variant="solo-filled"
@@ -268,6 +279,7 @@ const openMarketPluginDetail = (plugin) => {
         <button
           v-bind="props"
           type="button"
+          :aria-label="tm('market.installPlugin')"
           class="v-btn v-btn--elevated v-btn--icon v-theme--PurpleThemeDark bg-darkprimary v-btn--density-default v-btn--size-x-large v-btn--variant-elevated fab-button"
           style="
             position: fixed;
@@ -291,7 +303,7 @@ const openMarketPluginDetail = (plugin) => {
       </template>
     </v-tooltip>
 
-    <div class="mt-4">
+    <div class="market-results">
       <div
         class="d-flex align-center mb-2"
         style="justify-content: space-between; flex-wrap: wrap; gap: 8px"
@@ -413,31 +425,8 @@ const openMarketPluginDetail = (plugin) => {
 </template>
 
 <style scoped>
-.plugin-view-tabs {
-  background: transparent;
-  flex: 0 0 auto;
-}
-
-.plugin-view-tab {
-  color: rgba(var(--v-theme-on-surface), 0.54);
-  font-size: 1.25rem;
-  font-weight: 650;
-  min-width: 0;
-  padding: 0 10px;
-}
-
-.plugin-view-tab:first-child {
-  padding-left: 0;
-}
-
-.plugin-view-tab.v-tab--selected {
-  color: rgba(var(--v-theme-on-surface), 0.92);
-}
-
-.plugin-view-tabs :deep(.v-tabs-slider) {
-  background: rgba(var(--v-theme-on-surface), 0.5);
-  height: 2px;
-}
+.market-mobile-install { display: none; }
+.market-results { margin-top: 16px; }
 
 .market-header-row,
 .market-header-primary,
@@ -518,9 +507,17 @@ const openMarketPluginDetail = (plugin) => {
     width: auto;
   }
 
-  .plugin-view-tab {
-    font-size: 1.125rem;
-    padding-inline: 8px;
-  }
+}
+
+@media (max-width: 600px) {
+  .market-header-row { gap: 6px; }
+  .market-header-primary { flex-wrap: nowrap; gap: 6px; }
+  .market-source-button { flex: 1 1 auto; min-width: 40px; }
+  .market-source-button :deep(.v-btn__content) { min-width: 0; }
+  .market-mobile-install { display: inline-flex; flex: 0 0 40px; }
+  .fab-button { display: none; }
+  .market-results { margin-top: 8px; }
+  .market-results h2 { font-size: 17px; line-height: 1.4; }
+  .market-filter-group { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 }
 </style>

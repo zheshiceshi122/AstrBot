@@ -151,10 +151,10 @@ function handleMouseLeave() {
 
 <style scoped>
 .command-suggestion-panel {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--glass-shadow);
   max-height: 280px;
   width: 320px;
   display: flex;
@@ -163,9 +163,9 @@ function handleMouseLeave() {
 }
 
 .command-suggestion-panel.is-dark {
-  background: #1e1e1e;
-  border-color: #404040;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  background: var(--color-surface-raised);
+  border-color: var(--color-line);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
 
 .command-suggestion-list {

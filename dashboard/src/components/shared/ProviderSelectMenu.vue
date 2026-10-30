@@ -420,7 +420,7 @@
     </v-card>
   </v-overlay>
 
-  <v-dialog v-model="showProviderEditDialog" width="800">
+  <v-dialog class="dashboard-form-dialog" v-model="showProviderEditDialog" width="800">
     <v-card>
       <v-card-title class="text-h3 pa-4 pb-0 pl-6">
         {{ providerEditDialogTitle }}
@@ -960,7 +960,7 @@ defineExpose({ getCurrentSelection });
 
 .provider-trigger--config {
   width: fit-content;
-  min-height: 36px;
+  min-height: 40px;
   justify-content: space-between;
   margin-left: auto;
   padding: 6px 8px;
@@ -1246,7 +1246,7 @@ defineExpose({ getCurrentSelection });
 .provider-drawer-card {
   display: flex;
   width: clamp(360px, 70vw, 1200px);
-  height: calc(100vh - 32px);
+  height: calc(var(--astrbot-overlay-height, 100dvh) - 32px);
   flex-direction: column;
   margin: 16px;
   overflow: hidden;
@@ -1272,7 +1272,7 @@ defineExpose({ getCurrentSelection });
 @media (max-width: 960px) {
   .provider-drawer-card {
     width: calc(100dvw - 24px);
-    height: calc(100dvh - 24px);
+    height: calc(var(--astrbot-overlay-height, 100dvh) - 24px);
     margin: 12px;
   }
 }
@@ -1283,7 +1283,7 @@ defineExpose({ getCurrentSelection });
   }
 
   .provider-trigger--input {
-    height: 38px;
+    height: 40px;
     max-width: 48vw;
   }
 }
@@ -1296,7 +1296,7 @@ defineExpose({ getCurrentSelection });
 
   .provider-drawer-card {
     width: 100dvw;
-    height: 100dvh;
+    height: var(--astrbot-overlay-height, 100dvh);
     margin: 0;
     border-radius: 0;
   }

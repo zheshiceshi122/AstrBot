@@ -1,197 +1,26 @@
 <script setup>
-import { ref, shallowRef, computed, watch } from 'vue';
-import { useCustomizerStore } from '../../../stores/customizer';
+import { computed } from 'vue';
+import { useCustomizerStore } from '@/stores/customizer';
 import { useMobileDrawerStore } from '@/stores/mobileDrawer';
 import { useI18n } from '@/i18n/composables';
-import sidebarItems, { EXTENSION_GROUP_KEY } from './sidebarItem';
+import sidebarItems from './sidebarItem';
 import NavItem from './NavItem.vue';
-import { usePluginSidebarItems } from '@/composables/usePluginSidebarItems';
 import { useDisplay } from 'vuetify';
-import { ChevronDown, ChevronRight, PanelLeft, Settings } from '@lucide/vue';
+import { PanelLeft, Settings } from '@lucide/vue';
 import ChatUILogo from '@/components/chat/ChatUILogo.vue';
 import { useCommonStore } from '@/stores/common';
 
 const { t } = useI18n();
-
 const customizer = useCustomizerStore();
 const mobileDrawer = useMobileDrawerStore();
 const commonStore = useCommonStore();
-const { pluginItems, pluginGroups } = usePluginSidebarItems();
-
-function buildSidebarMenu() {
-  // Plugin pages are flattened into the extension group section.
-  const tail = groupByPlugin.value
-    ? pluginGroups.value
-    : (pluginItems.value?.children ?? []);
-  return [...sidebarItems, ...tail];
-}
-
-// Group plugin views by plugin under the extensions group; off by default.
-const groupByPlugin = ref(localStorage.getItem('sidebar_group_by_plugin') === '1');
-watch(groupByPlugin, (val) => {
-  localStorage.setItem('sidebar_group_by_plugin', val ? '1' : '0');
-  sidebarMenu.value = buildSidebarMenu();
-  openedItems.value = sanitizeOpenedItems(openedItems.value, sidebarMenu.value);
-});
-
-function toggleGroupByPlugin() {
-  groupByPlugin.value = !groupByPlugin.value;
-}
-
-function collectGroupValues(items, values = new Set()) {
-  items.forEach((item) => {
-    if (item?.children && item.title) {
-      values.add(item.value || item.title);
-      collectGroupValues(item.children, values);
-    }
-  });
-  return values;
-}
-
-function sanitizeOpenedItems(items, menuItems) {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-
-  const groupValues = collectGroupValues(menuItems);
-  return items.filter((item) => typeof item === 'string' && groupValues.has(item));
-}
-
-function getInitialOpenedItems(menuItems) {
-  try {
-    const stored = JSON.parse(localStorage.getItem('sidebar_openedItems') || '[]');
-    return sanitizeOpenedItems(stored, menuItems);
-  } catch {
-    return [];
-  }
-}
-
-const sidebarMenu = shallowRef(buildSidebarMenu());
-
-// Collapsed group headers, persisted across sessions.
-const collapsedGroups = ref(JSON.parse(localStorage.getItem('sidebar_collapsed_groups') || '[]'));
-watch(collapsedGroups, (val) => {
-  localStorage.setItem('sidebar_collapsed_groups', JSON.stringify(val));
-}, { deep: true });
-
-function toggleGroup(header) {
-  const idx = collapsedGroups.value.indexOf(header);
-  if (idx >= 0) {
-    collapsedGroups.value.splice(idx, 1);
-  } else {
-    collapsedGroups.value.push(header);
-  }
-}
-
-// Pinned items (by `to`), lifted to the top of the sidebar; persisted locally.
-const pinnedItems = ref(JSON.parse(localStorage.getItem('sidebar_pinned_items') || '[]'));
-watch(pinnedItems, (val) => {
-  localStorage.setItem('sidebar_pinned_items', JSON.stringify(val));
-}, { deep: true });
-
-function togglePin(item) {
-  const idx = pinnedItems.value.indexOf(item.to);
-  if (idx >= 0) {
-    pinnedItems.value.splice(idx, 1);
-  } else {
-    pinnedItems.value.push(item.to);
-  }
-}
-
-// `to` values of items under the extensions group header (incl. plugin pages).
-const extensionTos = computed(() => {
-  const tos = new Set();
-  let inExtension = false;
-  for (const item of sidebarMenu.value) {
-    if (item.header) {
-      inExtension = item.header === EXTENSION_GROUP_KEY;
-    } else if (inExtension && item.to) {
-      tos.add(item.to);
-    } else if (inExtension && item.children) {
-      for (const child of item.children) {
-        if (child.to) tos.add(child.to);
-      }
-    }
-  }
-  return tos;
-});
-
-// 侧边栏分组展开状态持久化
-const openedItems = ref(getInitialOpenedItems(sidebarMenu.value));
-watch(openedItems, (val) => {
-  localStorage.setItem('sidebar_openedItems', JSON.stringify(sanitizeOpenedItems(val, sidebarMenu.value)));
-}, { deep: true });
-
-// 当插件项变化时（如插件启用/停用），刷新菜单
-watch(pluginItems, () => {
-  sidebarMenu.value = buildSidebarMenu();
-  openedItems.value = sanitizeOpenedItems(openedItems.value, sidebarMenu.value);
-});
-
 const { smAndDown: isMobile } = useDisplay();
-
-const isRailSidebar = computed(
-  () => !isMobile.value && customizer.mini_sidebar,
-);
-
-// Items visible in the sidebar: pinned extension items are lifted to the top
-// of the extensions group; entries under a collapsed header are hidden
-// (rail mode always shows everything).
-const visibleMenu = computed(() => {
-  const pinnedSet = new Set(pinnedItems.value);
-  const extTos = extensionTos.value;
-  const isOpen = (header) => isRailSidebar.value || !collapsedGroups.value.includes(header);
-  const pinned = [];
-  const result = [];
-  let currentHeader = null;
-  for (const item of sidebarMenu.value) {
-    if (item.header) {
-      currentHeader = item.header;
-      result.push(item);
-      continue;
-    }
-    if (item.children) {
-      // Plugin group in group-by-plugin mode: lift pinned views out of it.
-      const keptChildren = item.children.filter((child) => {
-        if (pinnedSet.has(child.to) && extTos.has(child.to)) {
-          pinned.push(child);
-          return false;
-        }
-        return true;
-      });
-      if (isOpen(currentHeader) && keptChildren.length) {
-        result.push({ ...item, children: keptChildren });
-      }
-      continue;
-    }
-    if (pinnedSet.has(item.to) && extTos.has(item.to)) {
-      pinned.push(item);
-      continue;
-    }
-    if (!currentHeader || isOpen(currentHeader)) {
-      result.push(item);
-    }
-  }
-  if (pinned.length) {
-    const idx = result.findIndex((i) => i.header === EXTENSION_GROUP_KEY);
-    if (idx >= 0 && isOpen(EXTENSION_GROUP_KEY)) {
-      result.splice(idx + 1, 0, ...pinned);
-    } else {
-      result.push(...pinned);
-    }
-  }
-  return result;
-});
+const isRailSidebar = computed(() => !isMobile.value && customizer.mini_sidebar);
 const botVersion = computed(() => commonStore.astrbotVersion ? `v${commonStore.astrbotVersion}` : '');
-
 function toggleSidebar() {
-  if (isMobile.value) {
-    mobileDrawer.SET(false);
-    return;
-  }
-  customizer.SET_MINI_SIDEBAR(!customizer.mini_sidebar);
+  if (isMobile.value) mobileDrawer.SET(false);
+  else customizer.SET_MINI_SIDEBAR(!customizer.mini_sidebar);
 }
-
 </script>
 
 <template>
@@ -244,62 +73,8 @@ function toggleSidebar() {
         </v-btn>
       </div>
 
-      <v-list :class="['dashboard-sidebar-list', 'listitem', 'flex-grow-1', { 'hidden-scrollbar': isRailSidebar }]" v-model:opened="openedItems" :open-strategy="'multiple'">
-        <template
-          v-for="(item, i) in visibleMenu"
-          :key="item.to || item.value || item.header || item.title || `sidebar-item-${i}`"
-        >
-          <div
-            v-if="item.header"
-            v-show="!isRailSidebar"
-            class="sidebar-group-header"
-            :class="{ 'sidebar-group-header--toggle': item.collapsible }"
-            @click="item.collapsible && toggleGroup(item.header)"
-          >
-            <span>{{ t(item.header) }}</span>
-            <span class="sidebar-group-header-actions">
-              <v-tooltip
-                v-if="item.groupToggle"
-                location="right"
-                :text="groupByPlugin ? t('core.navigation.ungroupByPlugin') : t('core.navigation.groupByPlugin')"
-                :open-delay="0"
-                content-class="plugin-page-hover-card"
-              >
-                <template v-slot:activator="{ props: tooltipProps }">
-                  <button
-                    v-bind="tooltipProps"
-                    type="button"
-                    class="sidebar-group-header-icon"
-                    :class="{ 'sidebar-group-header-icon--active': groupByPlugin }"
-                    :aria-label="groupByPlugin ? t('core.navigation.ungroupByPlugin') : t('core.navigation.groupByPlugin')"
-                    @click.stop="toggleGroupByPlugin"
-                  >
-                    <v-icon :icon="groupByPlugin ? 'mdi-view-grid' : 'mdi-view-grid-outline'" size="14" />
-                  </button>
-                </template>
-              </v-tooltip>
-              <ChevronRight
-                v-if="item.collapsible && collapsedGroups.includes(item.header)"
-                :size="14"
-                class="sidebar-group-header-chevron"
-              />
-              <ChevronDown
-                v-else-if="item.collapsible"
-                :size="14"
-                class="sidebar-group-header-chevron"
-              />
-            </span>
-          </div>
-          <NavItem
-            v-else
-            :item="item"
-            class="leftPadding"
-            :rail="isRailSidebar"
-            :pinnable="extensionTos.has(item.to) || Boolean(item.children?.some((c) => extensionTos.has(c.to)))"
-            :pinned-tos="pinnedItems"
-            @toggle-pin="togglePin"
-          />
-        </template>
+      <v-list :class="['dashboard-sidebar-list', 'listitem', 'flex-grow-1', { 'hidden-scrollbar': isRailSidebar }]">
+        <NavItem v-for="item in sidebarItems" :key="item.to" :item="item" class="leftPadding" :rail="isRailSidebar" />
       </v-list>
       <div class="sidebar-footer">
         <v-btn class="sidebar-footer-btn" :class="{ 'sidebar-footer-icon-btn': isRailSidebar }"
@@ -327,9 +102,9 @@ function toggleSidebar() {
    and the Settings footer) stays above the mobile browsers' toolbar area. */
 .leftSidebar {
   top: 0 !important;
-  height: 100dvh !important;
+  height: var(--astrbot-viewport-height, 100dvh) !important;
   border-right: 0 !important;
-  background: rgb(var(--v-theme-surface)) !important;
+  background: var(--color-surface) !important;
   user-select: none;
 }
 
@@ -337,65 +112,6 @@ function toggleSidebar() {
   display: flex;
   height: 100%;
   flex-direction: column;
-}
-
-.sidebar-group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 10px 8px;
-  color: rgba(var(--v-theme-on-surface), 0.45);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  line-height: 16px;
-  text-transform: uppercase;
-  user-select: none;
-}
-
-.sidebar-group-header:first-child {
-  padding-top: 4px;
-}
-
-.sidebar-group-header--toggle {
-  cursor: pointer;
-}
-
-.sidebar-group-header--toggle:hover {
-  color: rgba(var(--v-theme-on-surface), 0.7);
-}
-
-.sidebar-group-header-chevron {
-  flex: 0 0 auto;
-}
-
-.sidebar-group-header-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.sidebar-group-header-icon {
-  display: grid;
-  place-items: center;
-  padding: 2px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.sidebar-group-header:hover .sidebar-group-header-icon,
-.sidebar-group-header-icon:focus-visible {
-  opacity: 1;
-}
-
-.sidebar-group-header-icon--active {
-  color: rgb(var(--v-theme-primary));
-  opacity: 1;
 }
 
 .sidebar-container {
@@ -415,6 +131,11 @@ function toggleSidebar() {
    band itself instead of clearing it. */
 :global(html:not([data-astrbot-desktop-platform='macos']) .leftSidebar .sidebar-container) {
   padding-top: 4px;
+}
+
+:global(html[data-mobile-standalone='true'] .leftSidebar .sidebar-container) {
+  padding-top: calc(4px + var(--astrbot-safe-top));
+  padding-bottom: var(--astrbot-safe-bottom);
 }
 
 :global(html:not([data-astrbot-desktop-platform='macos']) .leftSidebar .dashboard-sidebar-brand) {

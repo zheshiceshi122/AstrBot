@@ -80,7 +80,8 @@ OPEN_API_SCOPE_INCLUDES = {
 }
 
 DASHBOARD_JWT_COOKIE_NAME = "astrbot_dashboard_jwt"
-DASHBOARD_JWT_COOKIE_MAX_AGE = 7 * 24 * 60 * 60
+DASHBOARD_JWT_LIFETIME = datetime.timedelta(days=30)
+DASHBOARD_JWT_COOKIE_MAX_AGE = int(DASHBOARD_JWT_LIFETIME.total_seconds())
 SKIP_DEFAULT_PASSWORD_AUTH_ENV = "ASTRBOT_DASHBOARD_SKIP_DEFAULT_PASSWORD_AUTH"
 SKIP_DEFAULT_PASSWORD_AUTH_ENV_OLD = "DASHBOARD_SKIP_DEFAULT_PASSWORD_AUTH"
 LOCAL_DASHBOARD_HOSTS = {"127.0.0.1", "localhost", "::1"}
@@ -448,7 +449,7 @@ class AuthService:
         payload = {
             "username": username,
             "exp": datetime.datetime.now(datetime.timezone.utc)
-            + datetime.timedelta(days=7),
+            + DASHBOARD_JWT_LIFETIME,
         }
         if auth_source != "password":
             payload["auth_source"] = auth_source

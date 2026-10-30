@@ -252,10 +252,10 @@ export default {
 @media (max-width: 760px) {
   .refs-sidebar {
     position: fixed;
-    inset: 0;
+    inset: var(--astrbot-vv-offset-top, 0px) 0 auto;
     z-index: 1300;
     width: 100vw;
-    height: 100dvh;
+    height: var(--astrbot-viewport-height, 100dvh);
     margin-top: 0;
     border-left: 0;
   }

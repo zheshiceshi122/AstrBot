@@ -191,7 +191,7 @@
           </template>
         </section>
 
-        <v-dialog v-model="platformDialog" max-width="520">
+        <v-dialog class="dashboard-form-dialog" v-model="platformDialog" max-width="520">
           <v-card class="dashboard-dialog-card">
             <v-card-title class="text-h3 pa-4 pb-0 pl-6">
               {{ tm("platformDialog.title") }}
@@ -232,7 +232,7 @@
           {{ snackbar.message }}
         </v-snackbar>
 
-        <v-dialog v-model="createDialog" max-width="620">
+        <v-dialog class="dashboard-form-dialog" v-model="createDialog" max-width="620">
           <v-card class="dashboard-dialog-card">
             <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
               dialogTitle
@@ -1354,5 +1354,19 @@ onMounted(() => {
   .schedule-inline-fields {
     grid-template-columns: 1fr;
   }
+}
+@media (max-width: 600px) {
+  .cron-page { padding-bottom: 8px; } .cron-header { gap: 10px; margin-bottom: 8px !important; padding-bottom: 8px !important; } .cron-header-actions { gap: 4px; } .task-filter-bar { gap: 6px; margin-bottom: 10px; } .task-description { font-size: 13px !important; line-height: 1.5; } .task-meta { gap: 4px 10px; }
+}
+@media (max-width: 600px) {
+
+  .cron-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 4px 8px; }
+  .cron-header-copy { display: contents; }
+  .cron-header-copy > .dashboard-title { grid-column: 1; grid-row: 1; align-self: center; }
+  .cron-header-copy > .dashboard-subtitle { grid-column: 1 / -1; grid-row: 2; }
+  .cron-header-actions { grid-column: 2; grid-row: 1; width: auto; flex-wrap: nowrap; }
+  .task-surface > .text-center.pa-8 { padding: 16px 10px !important; font-size: 13px; }
+  .task-surface > .text-center.pa-8 > .v-icon { width: 32px !important; height: 32px !important; font-size: 32px !important; }
+  .task-surface > .text-center.pa-8 > p { margin-top: 6px !important; }
 }
 </style>

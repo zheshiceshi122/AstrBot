@@ -9,6 +9,8 @@
     "applyTip": "`この設定を適用` をクリックすると、設定が一時保存されてビジュアル編集に反映されます。保存するには、右下の保存ボタンをクリックしてください。"
   },
   "actions": {
+    "more": "その他の操作",
+    "test": "チャットをテスト",
     "save": "設定を保存",
     "delete": "この項目を削除",
     "add": "追加",
@@ -28,7 +30,7 @@
   "messages": {
     "configApplied": "設定を適用しました。保存するには、右下の保存ボタンをクリックしてください。",
     "configApplyError": "設定を適用できませんでした。JSON の形式が正しくありません。",
-    "unsavedChangesNotice": "まだ保存されていません。右下のボタンをクリックして保存してください。",
+    "unsavedChangesNotice": "未保存",
     "saveSuccess": "設定を保存しました。",
     "saveError": "設定を保存できませんでした。",
     "loadError": "設定を読み込めませんでした。",
@@ -73,6 +75,7 @@
     "localSettingsTitle": "AstrBot 組み込み AI",
     "settingsSuffix": "設定",
     "tabs": {
+      "common": "共通",
       "model": "モデル",
       "persona": "ペルソナ",
       "capabilities": "機能",
@@ -90,6 +93,7 @@
     },
     "common": {
       "title": "共通設定",
+      "scope": "全体",
       "subtitle": "これらの設定は実行方式を切り替えても変更されません。"
     },
     "disabled": {

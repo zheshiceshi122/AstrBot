@@ -1,5 +1,6 @@
 <template>
   <v-dialog
+    class="dashboard-form-dialog"
     v-model="showDialog"
     :max-width="$vuetify.display.smAndDown ? undefined : '1200px'"
     scrollable
@@ -507,7 +508,7 @@ watch(
   }
 
   .persona-form-content {
-    max-height: calc(100vh - 128px);
+    max-height: calc(var(--astrbot-overlay-height, 100dvh) - 128px);
     padding: 16px !important;
   }
 

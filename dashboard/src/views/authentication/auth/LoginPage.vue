@@ -131,12 +131,7 @@ onMounted(async () => {
 
   // 检查用户是否已登录，如果已登录则重定向
   if (authStore.has_token()) {
-    const onboardingCompleted = await authStore.checkOnboardingCompleted();
-    if (onboardingCompleted) {
-      router.push('/dashboard/default');
-    } else {
-      router.push('/welcome');
-    }
+    router.push('/platforms');
     return;
   }
 
@@ -286,14 +281,25 @@ onMounted(async () => {
 
 <style lang="scss">
 .login-page-container {
-  background-color: rgb(var(--v-theme-containerBg));
+  background: var(--page-background);
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Fit the login card in the visible area above the phone keyboard and let it
+   scroll, so the password field and submit button stay reachable. */
+html[data-mobile-keyboard='true'] .login-page-container {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 16px 0;
 }
 
 .login-card {
@@ -363,5 +369,24 @@ onMounted(async () => {
 
 .version-dialog-actions {
   padding-top: 0;
+}
+
+/* Phone login: the same 40px touch scale as the dashboard, and 16px field text
+   so iOS does not zoom the form when it receives focus. */
+@media (max-width: 600px) {
+  .login-page-container .theme-toggle-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .login-page-container .v-field__input,
+  .login-page-container .v-field__input input {
+    font-size: 16px;
+  }
+
+  .login-page-container .v-btn {
+    min-height: 40px;
+  }
 }
 </style>

@@ -5,7 +5,7 @@
   "providers": "模型提供商",
   "commands": "指令管理",
   "persona": "人格设定",
-  "data": "数据与日志",
+  "data": "工作台",
   "dataTabs": {
     "statistics": "统计",
     "conversations": "对话",
@@ -26,6 +26,8 @@
   "chat": "聊天",
   "botMode": "机器人",
   "options": "选项",
+  "copyLayoutInfo": "复制布局信息",
+  "layoutInfoHelp": "仅尺寸、安全区与位置，不含聊天和配置",
   "cron": "未来任务",
   "conversation": "对话数据",
   "sessionManagement": "自定义规则",
@@ -64,5 +66,36 @@
     "system": "系统配置"
   },
   "pluginView": "插件可视化视图",
-  "pluginViewType": "插件可视化视图"
+  "pluginViewType": "插件可视化视图",
+  "mobileExtensions": "扩展",
+  "mobileSettings": "设置",
+  "mobileNavigation": "主导航",
+  "sectionNavigation": "分区导航",
+  "modelsAndApi": "模型与 API",
+  "retry": "重新加载",
+  "computerAccessScope": "作用于 default 配置文件；更改后立即保存。",
+  "computerAccessSandbox": "当前使用沙盒环境。关闭后禁用电脑能力；重新开启将使用本机环境。",
+  "hubGroups": {
+    "dialogue": "对话设定",
+    "tools": "插件与工具"
+  },
+  "hubHints": {
+    "providers": "配置接口地址、API Key 和可用模型。",
+    "config": "管理各配置文件的模型、回复方式与能力。",
+    "general": "运行环境、时区与存储清理。",
+    "appearance": "调整界面主题颜色。",
+    "network": "网络连接、下载镜像与代理。",
+    "security": "管理面板访问与安全选项。",
+    "maintenance": "备份、恢复、诊断与维护。",
+    "openapi": "管理供外部应用调用的 API 密钥。",
+    "resources": "文档、常见问题与更新记录。",
+    "about": "查看版本与项目信息。",
+    "persona": "编辑角色设定和对话风格。",
+    "knowledgeBase": "管理文档与检索知识。",
+    "extension": "安装、配置与管理插件。",
+    "mcp": "连接外部工具服务。",
+    "skills": "管理 Agent 可使用的技能。",
+    "components": "管理指令等插件行为。",
+    "subagent": "配置子代理与任务分工。"
+  }
 }

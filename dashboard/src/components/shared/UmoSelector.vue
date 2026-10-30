@@ -29,7 +29,7 @@
       </v-text-field>
     </slot>
 
-    <v-dialog v-model="dialog" max-width="900px" scrollable>
+    <v-dialog class="dashboard-form-dialog" v-model="dialog" max-width="900px" scrollable>
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
           t("core.common.umoSelector.title")
@@ -474,5 +474,10 @@ defineExpose({ openDialog });
 
 .umo-selection {
   border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+}
+@media (max-width: 600px) {
+  .umo-selection { max-height: 128px; padding: 8px !important; }
+  .umo-selector-list :deep(.v-list-item) { padding-inline: 8px; }
+  .umo-selector-list { max-height: min(360px, 45dvh); }
 }
 </style>

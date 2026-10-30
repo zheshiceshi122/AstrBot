@@ -1,24 +1,22 @@
 <template>
   <div class="persona-manager">
-    <div class="persona-page-header">
+    <PageToolbar class="persona-page-header">
       <div>
         <h1 class="text-h2 mb-1">
           {{ t("core.navigation.persona") }}
         </h1>
-        <p class="text-body-2 text-medium-emphasis mb-0">
-          {{ tm("page.description") }}
-        </p>
+
       </div>
 
-      <div class="toolbar-actions d-flex ga-1">
+      <template #actions><div class="toolbar-actions d-flex ga-1">
         <v-btn-group
           class="create-persona-button-group"
           color="primary"
           variant="tonal"
           divided
         >
-          <v-btn prepend-icon="mdi-plus" @click="openCreatePersonaDialog">
-            {{ tm("buttons.create") }}
+          <v-btn prepend-icon="mdi-plus" :aria-label="tm('buttons.create')" :title="tm('buttons.create')" @click="openCreatePersonaDialog">
+            <span class="create-persona-label">{{ tm("buttons.create") }}</span>
           </v-btn>
           <v-menu location="bottom end">
             <template #activator="{ props }">
@@ -54,8 +52,11 @@
           style="display: none"
           @change="handleImportFile"
         />
-      </div>
-    </div>
+      </div></template>
+      <template #description>        <p class="text-body-2 text-medium-emphasis mb-0">
+          {{ tm("page.description") }}
+        </p></template>
+    </PageToolbar>
 
     <!-- 移动端顶部导航 -->
     <div v-if="hasFolders" class="mobile-nav d-md-none mb-4">
@@ -159,23 +160,6 @@
               <p class="text-body-1 text-medium-emphasis mb-4">
                 {{ tm("empty.folderEmptyDescription") }}
               </p>
-              <div class="d-flex justify-center ga-2">
-                <v-btn
-                  color="primary"
-                  variant="tonal"
-                  prepend-icon="mdi-plus"
-                  @click="openCreatePersonaDialog"
-                >
-                  {{ tm("buttons.create") }}
-                </v-btn>
-                <v-btn
-                  variant="outlined"
-                  prepend-icon="mdi-folder-plus"
-                  @click="showCreateFolderDialog = true"
-                >
-                  {{ tm("folder.createButton") }}
-                </v-btn>
-              </div>
             </v-card>
           </div>
         </div>
@@ -194,7 +178,7 @@
     />
 
     <!-- 查看 Persona 详情对话框 -->
-    <v-dialog v-model="showViewDialog" max-width="700px">
+    <v-dialog class="dashboard-form-dialog" v-model="showViewDialog" max-width="700px">
       <v-card v-if="viewingPersona">
         <v-card-title
           class="text-h3 pa-4 pb-0 pl-6 d-flex justify-space-between align-center"
@@ -357,7 +341,7 @@
     />
 
     <!-- 重命名文件夹对话框 -->
-    <v-dialog v-model="showRenameFolderDialog" max-width="400px">
+    <v-dialog class="dashboard-form-dialog" v-model="showRenameFolderDialog" max-width="400px">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">{{
           tm("folder.renameDialog.title")
@@ -401,7 +385,7 @@
     />
 
     <!-- 删除文件夹确认对话框 -->
-    <v-dialog v-model="showDeleteFolderDialog" max-width="450px">
+    <v-dialog class="dashboard-form-dialog" v-model="showDeleteFolderDialog" max-width="450px">
       <v-card>
         <v-card-title class="text-h3 pa-4 pb-0 pl-6">
           <v-icon class="mr-2" color="error">mdi-alert</v-icon>
@@ -451,6 +435,7 @@
 </template>
 
 <script lang="ts">
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { defineComponent } from "vue";
 import { useI18n, useModuleI18n } from "@/i18n/composables";
 import { usePersonaStore } from "@/stores/personaStore";
@@ -492,6 +477,7 @@ interface RenameFolderData {
 export default defineComponent({
   name: "PersonaManager",
   components: {
+    PageToolbar,
     FolderTree,
     FolderBreadcrumb,
     FolderCard,
@@ -884,7 +870,7 @@ export default defineComponent({
   flex-shrink: 0;
   padding: 0;
   height: fit-content;
-  max-height: calc(100vh - 200px);
+  max-height: calc(var(--astrbot-overlay-height, 100dvh) - 200px);
   overflow: hidden;
   flex-direction: column;
 }
@@ -982,5 +968,19 @@ export default defineComponent({
   .card-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+@media (max-width: 600px) {
+  .persona-page-header { gap: 8px; margin-bottom: 12px; } .persona-page-header h1 { font-size: 20px !important; } .persona-page-header p { font-size: 13px !important; line-height: 1.5; } .toolbar-actions { width: auto; overflow: visible; } .create-persona-button-group, .create-persona-button-group :deep(.v-btn) { height: 40px !important; } .card-grid { gap: 8px; }
+}
+@media (max-width: 600px) {
+  .persona-page-header { flex-wrap: wrap; align-items: center; }
+  .persona-page-header p { font-size: 12px !important; }
+  .toolbar-actions { flex: 0 0 auto; }
+}
+@media (max-width: 600px) {
+  .create-persona-label { display: none; }
+  .create-persona-button-group > .v-btn { width: 40px; min-width: 40px; height: 40px; padding: 0; }
+  .create-persona-button-group > .v-btn :deep(.v-btn__prepend) { margin: 0; }
+  .persona-page-header.page-toolbar--described { flex-wrap: wrap; }
 }
 </style>
