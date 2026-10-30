@@ -1,1 +1,0 @@
-import{B as e}from"./index-CzbsQaMh.js";import{r}from"./_.contribution-DYMffpWE.js";import"./editor.api-D_IhFarJ.js";r({id:"powershell",extensions:[".ps1",".psm1",".psd1"],aliases:["PowerShell","powershell","ps","ps1"],loader:()=>e(()=>import("./powershell-Dd3NCNK9.js"),[])});
