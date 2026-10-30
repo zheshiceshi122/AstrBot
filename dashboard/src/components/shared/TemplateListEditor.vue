@@ -56,7 +56,7 @@
             <v-icon>{{ expandedEntries[entryIndex] ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
           </v-btn>
           <div class="d-flex flex-column">
-            <v-list-item-title class="property-name">{{ templateLabel(entry.__template_key) }}</v-list-item-title>
+            <v-list-item-title class="property-name">{{ entryDisplayName(entry) || templateLabel(entry.__template_key) }}</v-list-item-title>
             <v-list-item-subtitle class="property-hint entry-display-text" v-if="templateDisplayText(entry)">
               {{ templateDisplayText(entry) }}
             </v-list-item-subtitle>
@@ -344,6 +344,21 @@ function removeEntry(index) {
 
 function toggleEntry(index) {
   expandedEntries.value[index] = !expandedEntries.value[index]
+}
+
+/**
+ * Prefer the entry's own label over the shared template name, so a collapsed
+ * list of same-template entries stays distinguishable.
+ *
+ * Args:
+ *   entry: One row of the template list.
+ *
+ * Returns:
+ *   The entry label, or an empty string when the entry has none.
+ */
+function entryDisplayName(entry) {
+  const raw = entry?.name ?? entry?.title
+  return typeof raw === 'string' ? raw.trim() : ''
 }
 
 function getTemplate(entry) {
