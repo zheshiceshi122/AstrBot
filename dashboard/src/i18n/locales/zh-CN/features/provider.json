@@ -7,6 +7,7 @@
     "addProvider": "新增模型提供商",
     "deleteProvider": "删除模型提供商",
     "selectHint": "请选择一个模型提供商",
+      "backToList": "返回提供商列表",
     "providerType": "提供商类型",
     "tabs": {
       "all": "全部",

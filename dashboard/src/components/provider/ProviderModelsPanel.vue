@@ -615,17 +615,37 @@ const isProviderSaving = (providerId) => props.savingProviders.includes(provider
     gap: 14px;
   }
 
+  /* One line per model: name truncates, actions stay pinned right. */
   .provider-model-row {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 10px;
-    padding: 14px 0;
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+    padding: 10px 0;
+  }
+
+  .provider-model-row__main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .provider-model-row__title,
+  .provider-model-row__subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .provider-model-row__actions {
-    align-self: flex-end;
-    flex-wrap: wrap;
+    align-self: center;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
     justify-content: flex-end;
+  }
+
+  .provider-models-empty,
+  .provider-models-empty--small {
+    min-height: 96px;
+    padding-block: 12px;
   }
 }
 </style>

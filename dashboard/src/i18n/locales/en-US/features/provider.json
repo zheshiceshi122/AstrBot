@@ -7,6 +7,7 @@
     "addProvider": "Add Provider",
     "deleteProvider": "Delete provider",
     "selectHint": "Please select a provider",
+      "backToList": "Back to providers",
     "providerType": "Provider Type",
     "tabs": {
       "all": "All",

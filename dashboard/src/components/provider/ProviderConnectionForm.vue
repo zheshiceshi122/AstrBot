@@ -105,8 +105,7 @@
     <div class="connection-actions">
       <span v-if="modified" class="connection-unsaved">{{
         tm("connection.unsaved")
-      }}</span>
-      <v-btn
+      }}</span>      <v-btn
         color="primary"
         variant="tonal"
         :loading="connection.busy || savingSource"
@@ -262,7 +261,7 @@ const profileOptions = computed(() => [
   .connection-key :deep(.v-btn), .connection-actions > .v-btn { min-height: 32px; }
   .connection-model { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
   .connection-model > .v-btn { align-self: start; margin-top: 2px; padding-inline: 8px; }
-  .connection-actions { margin-top: 10px; gap: 6px; }
-  .connection-actions > .v-btn { flex: 0 1 auto; }
+  .connection-actions { justify-content: stretch; margin-top: 10px; gap: 6px; }
+  .connection-actions > .v-btn { flex: 1 1 auto; }
 }
 </style>

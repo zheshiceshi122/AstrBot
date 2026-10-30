@@ -7,6 +7,7 @@
     "addProvider": "モデルプロバイダーを追加",
     "deleteProvider": "モデルプロバイダーを削除",
     "selectHint": "モデルプロバイダーを選択してください",
+      "backToList": "プロバイダー一覧に戻る",
     "providerType": "プロバイダータイプ",
     "tabs": {
       "all": "すべて",

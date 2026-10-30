@@ -120,11 +120,12 @@
 }
 
 @media (max-width: 600px) {
-  .config-form :deep(.config-row) { min-height: 42px; padding: 8px 10px; }
-  .config-form :deep(.config-row.config-row--toggle) { column-gap: 10px; padding-block: 6px; }
-  .config-form :deep(.property-name) { font-size: 13px; font-weight: 650; }
-  .config-form :deep(.property-hint) { margin-top: 2px; font-size: 12px; line-height: 1.4; }
-  .config-form :deep(.config-input) { padding-top: 6px; }
+  .config-form :deep(.config-row) { min-height: 32px; padding: 5px 8px; }
+  .config-form :deep(.config-row.config-row--toggle) { column-gap: 10px; padding-block: 3px; }
+  .config-form :deep(.property-name) { font-size: 12.5px; font-weight: 650; }
+  .config-form :deep(.property-hint) { margin-top: 2px; font-size: 11px; line-height: 1.3; }
+  .config-form :deep(.config-input) { padding-top: 3px; }
+  .config-form :deep(.v-field) { --v-input-control-height: 40px; }
   .config-form :deep(.config-row--toggle .config-input) { padding-top: 0; }
   .config-form :deep(.config-row--inline) {
     display: grid;
@@ -152,7 +153,7 @@
     --v-field-padding-top: 4px;
     --v-field-padding-bottom: 4px;
   }
-  .config-form :deep(.v-field__input) { font-size: 16px; }
+  .config-form :deep(.v-field__input) { font-size: 15px; }
   .config-form :deep(.v-list-item) { min-height: 0; }
   .config-form :deep(.v-field) { border-radius: 7px; }
   .config-form :deep(.config-section) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }

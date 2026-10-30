@@ -1,5 +1,5 @@
 <template>
-  <div ref="pageRoot" class="provider-page">
+  <div ref="pageRoot" class="provider-page" :class="{ 'provider-page--detail': mobileDetailOpen }">
     <v-container fluid class="pa-0">
       <PageToolbar class="provider-tabs-scroll">
         <div
@@ -24,7 +24,7 @@
       </PageToolbar>
 
       <div class="provider-content" :class="{ 'is-empty': (selectedProviderType === 'chat_completion' ? displayedProviderSources.length : displayedLegacyProviders.length) === 0 && !loadingSources }">
-        <div class="provider-workbench" :class="{ 'is-empty': (selectedProviderType === 'chat_completion' ? displayedProviderSources.length : displayedLegacyProviders.length) === 0 && !loadingSources }" :inert="connection.busy || savingSource || loadingModels || undefined">
+        <div class="provider-workbench" :class="{ 'is-empty': (selectedProviderType === 'chat_completion' ? displayedProviderSources.length : displayedLegacyProviders.length) === 0 && !loadingSources, 'is-detail-open': mobileDetailOpen }" :inert="connection.busy || savingSource || loadingModels || undefined">
           <div class="provider-workbench__sidebar">
             <ProviderSourcesPanel
               :displayed-provider-sources="selectedProviderType === 'chat_completion'
@@ -51,8 +51,8 @@
                 ? addProviderSource($event)
                 : addLegacyProvider($event)"
               @select-provider-source="selectedProviderType === 'chat_completion'
-                ? selectProviderSource($event)
-                : selectLegacyProvider($event)"
+                ? openMobileSource($event)
+                : openMobileLegacyProvider($event)"
               @delete-provider-source="selectedProviderType === 'chat_completion'
                 ? deleteProviderSource($event)
                 : deleteLegacyProvider($event)"
@@ -64,6 +64,15 @@
           <div class="provider-workbench__main">
             <template v-if="selectedProviderType === 'chat_completion'">
             <div v-if="selectedProviderSource" class="provider-config-shell">
+              <button
+                v-if="mobileDetailOpen"
+                type="button"
+                class="provider-mobile-back"
+                @click="closeMobileDetail"
+              >
+                <v-icon size="18">mdi-chevron-left</v-icon>
+                <span>{{ tm('providers.backToList') }}</span>
+              </button>
               <div v-if="selectedSponsor" class="provider-config-header">
                 <ProviderSourceSubtitle :api-base="selectedProviderSource.api_base" :sponsor="selectedSponsor" :tm="tm" />
               </div>
@@ -139,6 +148,15 @@
 
             <template v-else>
             <div v-if="selectedLegacyProvider" class="provider-config-shell">
+              <button
+                v-if="mobileDetailOpen"
+                type="button"
+                class="provider-mobile-back"
+                @click="closeMobileDetail"
+              >
+                <v-icon size="18">mdi-chevron-left</v-icon>
+                <span>{{ tm('providers.backToList') }}</span>
+              </button>
               <div class="provider-config-header">
                 <div class="provider-config-headline">
                   <div class="provider-config-title">
@@ -162,6 +180,8 @@
                     prepend-icon="mdi-connection"
                     :loading="isProviderTesting(selectedLegacyProvider.id)"
                     :disabled="selectedLegacyProvider.enable === false"
+                    :aria-label="tm('availability.test')"
+                    :title="tm('availability.test')"
                     variant="text"
                     rounded="xl"
                     @click="testSingleProvider(selectedLegacyProvider)"
@@ -173,6 +193,8 @@
                     prepend-icon="mdi-content-save-outline"
                     :loading="loading"
                     :disabled="!isLegacyProviderModified"
+                    :aria-label="tm('dialogs.config.save')"
+                    :title="tm('dialogs.config.save')"
                     variant="tonal"
                     rounded="xl"
                     @click="saveLegacyProvider"
@@ -383,6 +405,28 @@ const legacyConfigSchema = computed(() => {
     items.custom_headers.hint = tm('providers.decisionHints.customHeaders')
   }
   return schema
+})
+
+// Phones show the source list first and swap to the detail pane on selection,
+// instead of stacking both panes in one scrolling column.
+const mobileDetailOpen = ref(false)
+
+function openMobileSource(source) {
+  selectProviderSource(source)
+  mobileDetailOpen.value = true
+}
+
+function openMobileLegacyProvider(provider) {
+  selectLegacyProvider(provider)
+  mobileDetailOpen.value = true
+}
+
+function closeMobileDetail() {
+  mobileDetailOpen.value = false
+}
+
+watch(selectedProviderType, () => {
+  mobileDetailOpen.value = false
 })
 
 const unsavedLegacyProviderMarker = Symbol('unsavedLegacyProvider')
@@ -825,6 +869,11 @@ async function testSingleProvider(provider) {
   flex-shrink: 0;
 }
 
+/* Only the phone layout drills down, so the back affordance never shows on desktop. */
+.provider-mobile-back {
+  display: none;
+}
+
 .provider-config-body {
   flex: 1;
   min-height: 0;
@@ -922,18 +971,69 @@ async function testSingleProvider(provider) {
   }
 
   .provider-config-header {
-    align-items: center;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
     padding: 12px;
   }
 
-  .provider-config-actions :deep(.v-btn) {
-    width: 100%;
+  /* Drill down: the list and the detail pane trade places instead of stacking. */
+  .provider-workbench:not(.is-detail-open) .provider-workbench__divider,
+  .provider-workbench:not(.is-detail-open) .provider-workbench__main {
+    display: none;
+  }
+
+  /* The detail screen owns the viewport: the type strip only matters when
+     picking what to edit. */
+  .provider-page--detail .provider-tabs-scroll {
+    display: none;
+  }
+
+  /* Actions float in the header corner as icons; absolutely positioned so they
+     can never squeeze the title into a one-character column. */
+  .provider-config-header {
+    padding-right: 96px;
+    position: relative;
   }
 
   .provider-config-actions {
-    align-items: stretch !important;
-    flex-direction: column;
-    width: 100%;
+    flex-direction: row;
+    gap: 0;
+    position: absolute;
+    right: 6px;
+    top: 4px;
+    width: auto;
+  }
+
+  .provider-config-actions :deep(.v-btn__content) {
+    display: none;
+  }
+
+  .provider-config-actions :deep(.v-btn) {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 0;
+    width: 36px;
+  }
+
+  .provider-workbench.is-detail-open .provider-workbench__sidebar,
+  .provider-workbench.is-detail-open .provider-workbench__divider {
+    display: none;
+  }
+
+  .provider-mobile-back {
+    align-items: center;
+    align-self: flex-start;
+    background: transparent;
+    border: 0;
+    color: rgb(var(--v-theme-primary));
+    cursor: pointer;
+    display: flex;
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 13px;
+    gap: 2px;
+    padding: 8px 10px 2px;
   }
 
   .provider-section {
@@ -981,8 +1081,29 @@ async function testSingleProvider(provider) {
   }
 
   .provider-content { padding: 6px 4px; }
-  .provider-section { padding: 10px; }
+  .provider-section { padding: 8px; }
   .provider-section-title { font-size: 14px; }
+
+  /* Phone density: trim every gap that does not carry information. */
+  .provider-mobile-back {
+    font-size: 12px;
+    padding: 4px 8px 0;
+  }
+
+  .provider-config-header {
+    gap: 6px;
+    padding: 8px 96px 8px 10px;
+  }
+
+  .provider-config-subtitle {
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  /* "设置" only repeats what the fields already say. */
+  .provider-section.config-form > .provider-section-head {
+    display: none;
+  }
 }
 </style>
 

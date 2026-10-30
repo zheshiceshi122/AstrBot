@@ -413,30 +413,27 @@ const selectSourceByValue = (value) => {
   }
 
   .provider-sources-head {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
     padding: 10px 12px;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 0;
   }
 
-  .provider-sources-head__copy {
-    display: none;
-  }
-
-  .provider-sources-mobile-select {
-    display: block;
-  }
-
+  /* Phones keep the real list: the drill-down shows it on its own screen, so a
+     select would hide the base URL the list already puts on every row. */
+  .provider-sources-mobile-select,
   .provider-sources-mobile-delete {
-    display: inline-flex;
+    display: none;
   }
 
   .provider-sources-controls {
-    width: 100%;
+    width: auto;
   }
 
-  .provider-sources-list {
-    display: none;
+  /* Touch devices never hover, so a row's delete action stays hidden forever
+     unless it is shown outright. */
+  .provider-source-item__actions {
+    opacity: 1;
   }
 
   .provider-sources-empty {
