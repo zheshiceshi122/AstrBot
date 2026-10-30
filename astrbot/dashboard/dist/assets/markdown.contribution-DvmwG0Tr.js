@@ -1,0 +1,1 @@
+import{B as r}from"./index-CzbsQaMh.js";import{r as m}from"./_.contribution-DYMffpWE.js";import"./editor.api-D_IhFarJ.js";m({id:"markdown",extensions:[".md",".markdown",".mdown",".mkdn",".mkd",".mdwn",".mdtxt",".mdtext"],aliases:["Markdown","markdown"],loader:()=>r(()=>import("./markdown-DSZPf7rp.js"),[])});

@@ -1,0 +1,1 @@
+import{B as i}from"./index-CzbsQaMh.js";import{r}from"./_.contribution-DYMffpWE.js";import"./editor.api-D_IhFarJ.js";r({id:"ini",extensions:[".ini",".properties",".gitconfig"],filenames:["config",".gitattributes",".gitconfig",".editorconfig"],aliases:["Ini","ini"],loader:()=>i(()=>import("./ini-Drc7WvVn.js"),[])});
